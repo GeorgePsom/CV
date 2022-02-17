@@ -145,7 +145,8 @@ public:
             if (calibFixPrincipalPoint) flag |= fisheye::CALIB_FIX_PRINCIPAL_POINT;
         }
 
-        calibrationPattern = NOT_EXISTING;
+        calibrationPattern = CHESSBOARD;
+        /*calibrationPattern = NOT_EXISTING;
         if (!patternToUse.compare("CHESSBOARD")) calibrationPattern = CHESSBOARD;
         if (!patternToUse.compare("CIRCLES_GRID")) calibrationPattern = CIRCLES_GRID;
         if (!patternToUse.compare("ASYMMETRIC_CIRCLES_GRID")) calibrationPattern = ASYMMETRIC_CIRCLES_GRID;
@@ -153,7 +154,7 @@ public:
         {
             cerr << " Camera calibration mode does not exist: " << patternToUse << endl;
             goodInput = false;
-        }
+        }*/
         atImageList = 0;
 
     }
@@ -570,11 +571,24 @@ static bool runCalibration(Settings& s, Size& imageSize, Mat& cameraMatrix, Mat&
     calcBoardCornerPositions(s.boardSize, s.squareSize, objectPoints[0], s.calibrationPattern);
     objectPoints[0][s.boardSize.width - 1].x = objectPoints[0][0].x + grid_width;
     newObjPoints = objectPoints[0];
+    vector<Point3f> newObjPointsTemp = objectPoints[0];
+    int iter = 0;
+   
+    vector<vector<Point2f>> optimalImagePoints(imagePoints.size());
+    for (int i = 0; i < imagePoints.size(); i++)
+    {
+        optimalImagePoints[i] = imagePoints[i];
+    }
 
+    bool ok;
+
+    
+    
     objectPoints.resize(imagePoints.size(), objectPoints[0]);
 
     //Find intrinsic and extrinsic camera parameters
     double rms;
+
 
     if (s.useFisheye) {
         Mat _rvecs, _tvecs;
@@ -592,6 +606,7 @@ static bool runCalibration(Settings& s, Size& imageSize, Mat& cameraMatrix, Mat&
         int iFixedPoint = -1;
         if (release_object)
             iFixedPoint = s.boardSize.width - 1;
+
         rms = calibrateCameraRO(objectPoints, imagePoints, imageSize, iFixedPoint,
             cameraMatrix, distCoeffs, rvecs, tvecs, newObjPoints,
             s.flag | CALIB_USE_LU);
@@ -607,11 +622,108 @@ static bool runCalibration(Settings& s, Size& imageSize, Mat& cameraMatrix, Mat&
 
     cout << "Re-projection error reported by calibrateCamera: " << rms << endl;
 
-    bool ok = checkRange(cameraMatrix) && checkRange(distCoeffs);
+    ok = checkRange(cameraMatrix) && checkRange(distCoeffs);
 
     objectPoints.clear();
     objectPoints.resize(imagePoints.size(), newObjPoints);
     totalAvgErr = computeReprojectionErrors(objectPoints, imagePoints, rvecs, tvecs, cameraMatrix,
+        distCoeffs, reprojErrs, s.useFisheye);
+    float maxError = rms;
+    for (;;)
+    {
+        float bestError = 1000.0f;
+        int bestCandidate = -1;
+        
+        for (int j = 0; j < optimalImagePoints.size(); j++)
+        {
+            int imagePointsSize = optimalImagePoints.size() - 1;
+            vector<vector<Point2f>> imagePointsMinusOne;
+            for (int i = 0; i < optimalImagePoints.size(); i++)
+            {
+                if (i == j)
+                    continue;
+                imagePointsMinusOne.push_back(optimalImagePoints[i]);
+            }
+            objectPoints.resize(imagePointsSize, newObjPoints);
+
+            //Find intrinsic and extrinsic camera parameters
+            
+
+
+            if (s.useFisheye) {
+                Mat _rvecs, _tvecs;
+                rms = fisheye::calibrate(objectPoints, imagePointsMinusOne, imageSize, cameraMatrix, distCoeffs, _rvecs,
+                    _tvecs, s.flag);
+
+                rvecs.reserve(_rvecs.rows);
+                tvecs.reserve(_tvecs.rows);
+                for (int i = 0; i < int(objectPoints.size()); i++) {
+                    rvecs.push_back(_rvecs.row(i));
+                    tvecs.push_back(_tvecs.row(i));
+                }
+            }
+            else {
+                int iFixedPoint = -1;
+                if (release_object)
+                    iFixedPoint = s.boardSize.width - 1;
+
+                rms = calibrateCameraRO(objectPoints, imagePointsMinusOne, imageSize, iFixedPoint,
+                    cameraMatrix, distCoeffs, rvecs, tvecs, newObjPoints,
+                    s.flag | CALIB_USE_LU);
+            }
+
+            if (release_object) {
+                cout << "New board corners: " << endl;
+                cout << newObjPoints[0] << endl;
+                cout << newObjPoints[s.boardSize.width - 1] << endl;
+                cout << newObjPoints[s.boardSize.width * (s.boardSize.height - 1)] << endl;
+                cout << newObjPoints.back() << endl;
+            }
+
+            //cout << "Re-projection error reported by calibrateCamera: " << rms << endl;
+
+            ok = checkRange(cameraMatrix) && checkRange(distCoeffs);
+
+            objectPoints.clear();
+            objectPoints.resize(imagePointsSize, newObjPoints);
+            /*totalAvgErr = computeReprojectionErrors(objectPoints, imagePointsMinusOne, rvecs, tvecs, cameraMatrix,
+                distCoeffs, reprojErrs, s.useFisheye);*/
+            if (rms < bestError)
+            {
+                bestError = rms;
+                bestCandidate = j;
+            }
+        }
+        
+        vector<vector<Point2f>> temp;
+        for (int i = 0; i < optimalImagePoints.size(); i++)
+        {
+            temp.push_back(optimalImagePoints[i]);
+        }
+        optimalImagePoints.clear();
+        //optimalImagePoints.resize(temp.size() - 1);
+        for (int i = 0; i < temp.size(); i++)
+        {
+            if (i == bestCandidate)
+                continue;
+            optimalImagePoints.push_back(temp[i]);
+        }
+        
+       
+
+        
+
+        if (bestError > maxError || abs(bestError - maxError) < 0.0001f || optimalImagePoints.size() == 1) 
+            break;
+        else
+        {
+            maxError = bestError;
+            cout << "Iteration:  " << ++iter << ". Re-projection error reported by calibrateCamera: " << maxError << endl;
+        }
+           
+       
+    }
+    totalAvgErr = computeReprojectionErrors(objectPoints, optimalImagePoints, rvecs, tvecs, cameraMatrix,
         distCoeffs, reprojErrs, s.useFisheye);
 
     return ok;
