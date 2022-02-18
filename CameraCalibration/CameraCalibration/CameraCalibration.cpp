@@ -241,6 +241,8 @@ static inline void read(const FileNode& node, Settings& x, const Settings& defau
     else
         x.read(node);
 }
+static void calcBoardCornerPositions(Size boardSize, float squareSize, vector<Point3f>& corners,
+    Settings::Pattern patternType /*= Settings::CHESSBOARD*/);
 
 enum { DETECTION = 0, CAPTURING = 1, CALIBRATED = 2 };
 
@@ -504,10 +506,42 @@ int main(int argc, char* argv[])
         if (!vid.read(frame))
             break;
 
-        imshow("Webcam", frame);
+
+        Mat gray;
+        vector<Point2f> renderFrame;
+        cvtColor(frame, gray, COLOR_BGR2GRAY);
+        vector<Point2f> pointBuf;
+        
+        bool found;
+        found = findChessboardCorners(gray, s.boardSize, pointBuf, CALIB_CB_ADAPTIVE_THRESH | CALIB_CB_NORMALIZE_IMAGE | CALIB_CB_FAST_CHECK);
+        if (found)
+        {
+            vector<Point3f> objectPoints0(54), objectPoints1(54);
+            vector<vector<Point3f> > objectPoints(1);
+            Mat rvec, tvec;
+            calcBoardCornerPositions(s.boardSize, s.squareSize, objectPoints[0], s.calibrationPattern);
+           /* objectPoints[0] = objectPoints0;
+            objectPoints[1] = objectPoints1;*/
+            solvePnPRansac(objectPoints[0], pointBuf, cameraMatrix, distCoeffs, rvec, tvec);
+            projectPoints(objectPoints[0], rvec, tvec, cameraMatrix, distCoeffs, renderFrame);
+
+            line(frame, pointBuf[0], renderFrame[0], Scalar(255.0f, 0.0f, 0.0f));
+            line(frame, pointBuf[0], renderFrame[1], Scalar(255.0f, 255.0f, 0.0f));
+            line(frame, pointBuf[0], renderFrame[2], Scalar(255.0f, 0.0f, 255.0f));
+            imshow("Webcam", frame);
+
+
+        }
+        else
+        {
+            imshow("Webcam", frame);
+        }
+
+
+       
 
         char key = waitKey(1000 / framesPerSecond);
-        
+       
         switch (key)
         {
         case 27:
