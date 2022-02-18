@@ -454,7 +454,8 @@ int main(int argc, char* argv[])
 
     // -----------------------Show the undistorted image for the image list ------------------------
     //! [show_results]
-    if (s.inputType == Settings::IMAGE_LIST && s.showUndistorted && !cameraMatrix.empty())
+
+    /*if (s.inputType == Settings::IMAGE_LIST && s.showUndistorted && !cameraMatrix.empty())
     {
         Mat view, rview, map1, map2;
 
@@ -485,9 +486,35 @@ int main(int argc, char* argv[])
             if (c == ESC_KEY || c == 'q' || c == 'Q')
                 break;
         }
-    }
+    }*/
     //! [show_results]
 
+
+    // real-time video render
+    VideoCapture vid(0);
+    if (!vid.isOpened())
+        return 0;
+    int framesPerSecond = 30;
+
+    namedWindow("Webcam", WINDOW_AUTOSIZE);
+    Mat frame;
+
+    while (true)
+    {
+        if (!vid.read(frame))
+            break;
+
+        imshow("Webcam", frame);
+
+        char key = waitKey(1000 / framesPerSecond);
+        
+        switch (key)
+        {
+        case 27:
+            return 0;
+            break;
+        }
+    }
     return 0;
 }
 
@@ -630,8 +657,14 @@ static bool runCalibration(Settings& s, Size& imageSize, Mat& cameraMatrix, Mat&
         distCoeffs, reprojErrs, s.useFisheye);
     cout << "Re-projection error reported by calibrateCamera: " << totalAvgErr << endl;
     float maxError = totalAvgErr;
+    Mat bestCameraMatrix = cameraMatrix;
+    Mat bestDistCoeffs = distCoeffs;
+    vector<Mat> bestRvecs = rvecs;
+    vector<Mat> bestTvecs = tvecs;
+
     for (;;)
     {
+        break;
         float bestError = 1000.0f;
         int bestCandidate = -1;
         
@@ -691,6 +724,10 @@ static bool runCalibration(Settings& s, Size& imageSize, Mat& cameraMatrix, Mat&
                 distCoeffs, reprojErrs, s.useFisheye);
             if (totalAvgErr < bestError)
             {
+                bestCameraMatrix = cameraMatrix;
+                bestDistCoeffs = distCoeffs;
+                bestRvecs = rvecs;
+                bestTvecs = tvecs;
                 bestError = totalAvgErr;
                 bestCandidate = j;
             }
@@ -724,7 +761,10 @@ static bool runCalibration(Settings& s, Size& imageSize, Mat& cameraMatrix, Mat&
            
         
     }
-    
+    cameraMatrix = bestCameraMatrix;
+    distCoeffs = bestDistCoeffs;
+    rvecs = bestRvecs;
+    tvecs = bestTvecs;
 
     return ok;
 }
