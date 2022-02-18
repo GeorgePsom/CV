@@ -628,7 +628,8 @@ static bool runCalibration(Settings& s, Size& imageSize, Mat& cameraMatrix, Mat&
     objectPoints.resize(imagePoints.size(), newObjPoints);
     totalAvgErr = computeReprojectionErrors(objectPoints, imagePoints, rvecs, tvecs, cameraMatrix,
         distCoeffs, reprojErrs, s.useFisheye);
-    float maxError = rms;
+    cout << "Re-projection error reported by calibrateCamera: " << totalAvgErr << endl;
+    float maxError = totalAvgErr;
     for (;;)
     {
         float bestError = 1000.0f;
@@ -686,11 +687,11 @@ static bool runCalibration(Settings& s, Size& imageSize, Mat& cameraMatrix, Mat&
 
             objectPoints.clear();
             objectPoints.resize(imagePointsSize, newObjPoints);
-            /*totalAvgErr = computeReprojectionErrors(objectPoints, imagePointsMinusOne, rvecs, tvecs, cameraMatrix,
-                distCoeffs, reprojErrs, s.useFisheye);*/
-            if (rms < bestError)
+            totalAvgErr = computeReprojectionErrors(objectPoints, imagePointsMinusOne, rvecs, tvecs, cameraMatrix,
+                distCoeffs, reprojErrs, s.useFisheye);
+            if (totalAvgErr < bestError)
             {
-                bestError = rms;
+                bestError = totalAvgErr;
                 bestCandidate = j;
             }
         }
@@ -713,7 +714,7 @@ static bool runCalibration(Settings& s, Size& imageSize, Mat& cameraMatrix, Mat&
 
         
 
-        if (bestError > maxError || abs(bestError - maxError) < 0.0001f || optimalImagePoints.size() == 1) 
+        if (bestError > maxError || abs(bestError - maxError) < 0.001f || optimalImagePoints.size() == imagePoints.size() / 2) 
             break;
         else
         {
@@ -721,10 +722,9 @@ static bool runCalibration(Settings& s, Size& imageSize, Mat& cameraMatrix, Mat&
             cout << "Iteration:  " << ++iter << ". Re-projection error reported by calibrateCamera: " << maxError << endl;
         }
            
-       
+        
     }
-    totalAvgErr = computeReprojectionErrors(objectPoints, optimalImagePoints, rvecs, tvecs, cameraMatrix,
-        distCoeffs, reprojErrs, s.useFisheye);
+    
 
     return ok;
 }
