@@ -249,6 +249,10 @@ enum { DETECTION = 0, CAPTURING = 1, CALIBRATED = 2 };
 bool runCalibrationAndSave(Settings& s, Size imageSize, Mat& cameraMatrix, Mat& distCoeffs,
     vector<vector<Point2f> > imagePoints, float grid_width, bool release_object);
 
+static void drawCube(vector<Point2f> pointBuf, Mat cameraMatrix, Mat distCoeffs, Mat frame, Settings s);
+
+static void drawAxis(vector<Point2f> pointBuf, Mat cameraMatrix, Mat distCoeffs, Mat frame, Settings s);
+
 int main(int argc, char* argv[])
 {
     const String keys
@@ -508,7 +512,6 @@ int main(int argc, char* argv[])
 
 
         Mat gray;
-        vector<Point2f> renderFrame;
         cvtColor(frame, gray, COLOR_BGR2GRAY);
         vector<Point2f> pointBuf;
         
@@ -516,21 +519,8 @@ int main(int argc, char* argv[])
         found = findChessboardCorners(gray, s.boardSize, pointBuf, CALIB_CB_ADAPTIVE_THRESH | CALIB_CB_NORMALIZE_IMAGE | CALIB_CB_FAST_CHECK);
         if (found)
         {
-            vector<Point3f> objectPoints0(54), objectPoints1(54);
-            vector<vector<Point3f> > objectPoints(1);
-            Mat rvec, tvec;
-            calcBoardCornerPositions(s.boardSize, s.squareSize, objectPoints[0], s.calibrationPattern);
-           /* objectPoints[0] = objectPoints0;
-            objectPoints[1] = objectPoints1;*/
-            solvePnPRansac(objectPoints[0], pointBuf, cameraMatrix, distCoeffs, rvec, tvec);
-            projectPoints(objectPoints[0], rvec, tvec, cameraMatrix, distCoeffs, renderFrame);
-
-            line(frame, pointBuf[0], renderFrame[0], Scalar(255.0f, 0.0f, 0.0f));
-            line(frame, pointBuf[0], renderFrame[1], Scalar(255.0f, 255.0f, 0.0f));
-            line(frame, pointBuf[0], renderFrame[2], Scalar(255.0f, 0.0f, 255.0f));
-            imshow("Webcam", frame);
-
-
+            drawAxis(pointBuf, cameraMatrix, distCoeffs, frame, s);
+            drawCube(pointBuf, cameraMatrix, distCoeffs, frame, s);
         }
         else
         {
@@ -550,6 +540,69 @@ int main(int argc, char* argv[])
         }
     }
     return 0;
+}
+
+static void drawAxis(vector<Point2f> pointBuf, Mat cameraMatrix, Mat distCoeffs, Mat frame, Settings s) 
+{
+    vector<Point3f> objectPoints0(54), objectPoints1(54);
+    vector<vector<Point3f> > objectPoints(1);
+    Mat rvec, tvec;
+    vector<Point3f> axis;
+    vector<Point2f> renderFrame;
+    int axisSize = 60;
+
+    axis.push_back(Point3f(axisSize, 0, 0));
+    axis.push_back(Point3f(0, axisSize, 0));
+    axis.push_back(Point3f(0, 0, -axisSize));
+
+    calcBoardCornerPositions(s.boardSize, s.squareSize, objectPoints[0], s.calibrationPattern);
+
+    solvePnPRansac(objectPoints[0], pointBuf, cameraMatrix, distCoeffs, rvec, tvec);
+    projectPoints(axis, rvec, tvec, cameraMatrix, distCoeffs, renderFrame);
+
+
+
+    line(frame, pointBuf[0], renderFrame[0], Scalar(255.0f, 0.0f, 0.0f), 3);
+    line(frame, pointBuf[0], renderFrame[1], Scalar(255.0f, 255.0f, 0.0f), 3);
+    line(frame, pointBuf[0], renderFrame[2], Scalar(255.0f, 0.0f, 255.0f), 3);
+    
+    
+    imshow("Webcam", frame);
+}
+
+static void drawCube(vector<Point2f> pointBuf, Mat cameraMatrix, Mat distCoeffs, Mat frame, Settings s)
+{
+    vector<Point3f> objectPoints0(54), objectPoints1(54);
+    vector<vector<Point3f> > objectPoints(1);
+    Mat rvec, tvec;
+    vector<Point3f> axis;
+    vector<Point2f> renderFrame;
+    int cubeSize = 30;
+
+    axis.push_back(Point3f(0, 0, 0));
+    axis.push_back(Point3f(0, cubeSize, 0));
+    axis.push_back(Point3f(cubeSize, cubeSize, 0));
+    axis.push_back(Point3f(cubeSize, 0, 0));
+    axis.push_back(Point3f(0, 0, -cubeSize));
+    axis.push_back(Point3f(0, cubeSize, -cubeSize));
+    axis.push_back(Point3f(cubeSize, cubeSize, -cubeSize));
+    axis.push_back(Point3f(cubeSize, 0, -cubeSize));
+
+    calcBoardCornerPositions(s.boardSize, s.squareSize, objectPoints[0], s.calibrationPattern);
+
+    solvePnPRansac(objectPoints[0], pointBuf, cameraMatrix, distCoeffs, rvec, tvec);
+    projectPoints(axis, rvec, tvec, cameraMatrix, distCoeffs, renderFrame);
+
+
+    for (int i = 0; i < 4; i++)
+    {
+        line(frame, renderFrame[i], renderFrame[(i + 1)%4], Scalar(200.0f, 200.0f, 255.0f), 2);
+        line(frame, renderFrame[i], renderFrame[i+4], Scalar(200.0f, 200.0f, 255.0f), 2);
+        line(frame, renderFrame[i+4], renderFrame[4 + (i + 1) % 4], Scalar(200.0f, 200.0f, 255.0f), 2);
+    }
+
+
+    imshow("Webcam", frame);
 }
 
 //! [compute_errors]
