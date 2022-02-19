@@ -554,6 +554,7 @@ int main(int argc, char* argv[])
     return 0;
 }
 
+// Draws an axis using the cameraMatrix and distCoeffs in the frame
 static void drawAxis(vector<Point2f> pointBuf, Mat cameraMatrix, Mat distCoeffs, Mat frame, Settings s) 
 {
     
@@ -582,6 +583,7 @@ static void drawAxis(vector<Point2f> pointBuf, Mat cameraMatrix, Mat distCoeffs,
     imshow("Webcam", frame);
 }
 
+// Draws a cube using the cameraMatrixand distCoeffs in the frame that is moving along the checkerboard plane.
 static void drawCube(vector<Point2f> pointBuf, Mat cameraMatrix, Mat distCoeffs, Mat frame, Settings s, Point3f translate)
 {
     
