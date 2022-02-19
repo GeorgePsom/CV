@@ -519,10 +519,12 @@ int main(int argc, char* argv[])
         cvtColor(frame, gray, COLOR_BGR2GRAY);
         vector<Point2f> pointBuf;
         
+        // Draw only if we detect the chessboard.
         bool found;
         found = findChessboardCorners(gray, s.boardSize, pointBuf, CALIB_CB_ADAPTIVE_THRESH | CALIB_CB_NORMALIZE_IMAGE | CALIB_CB_FAST_CHECK);
         if (found)
         {
+
             drawAxis(pointBuf, cameraMatrix, distCoeffs, frame, s);
             drawCube(pointBuf, cameraMatrix, distCoeffs, frame, s, translate);
         }
@@ -535,7 +537,7 @@ int main(int argc, char* argv[])
 
         if (translate.x == 100 || translate.x == 0)
         {
-            speed = -speed;
+            speed *= -1.0f;
         }
        
 
@@ -543,6 +545,7 @@ int main(int argc, char* argv[])
        
         switch (key)
         {
+        // End the application when ESC is pressed
         case 27:
             return 0;
             break;
@@ -553,7 +556,7 @@ int main(int argc, char* argv[])
 
 static void drawAxis(vector<Point2f> pointBuf, Mat cameraMatrix, Mat distCoeffs, Mat frame, Settings s) 
 {
-    vector<Point3f> objectPoints0(54), objectPoints1(54);
+    
     vector<vector<Point3f> > objectPoints(1);
     Mat rvec, tvec;
     vector<Point3f> axis;
@@ -565,7 +568,7 @@ static void drawAxis(vector<Point2f> pointBuf, Mat cameraMatrix, Mat distCoeffs,
     axis.push_back(Point3f(0, 0, -axisSize));
 
     calcBoardCornerPositions(s.boardSize, s.squareSize, objectPoints[0], s.calibrationPattern);
-
+    // We calculate the rvec and tvec of the current frame to project the 3D objects
     solvePnPRansac(objectPoints[0], pointBuf, cameraMatrix, distCoeffs, rvec, tvec);
     projectPoints(axis, rvec, tvec, cameraMatrix, distCoeffs, renderFrame);
 
@@ -581,7 +584,7 @@ static void drawAxis(vector<Point2f> pointBuf, Mat cameraMatrix, Mat distCoeffs,
 
 static void drawCube(vector<Point2f> pointBuf, Mat cameraMatrix, Mat distCoeffs, Mat frame, Settings s, Point3f translate)
 {
-    vector<Point3f> objectPoints0(54), objectPoints1(54);
+    
     vector<vector<Point3f> > objectPoints(1);
     Mat rvec, tvec;
     vector<Point3f> axis;
@@ -607,7 +610,7 @@ static void drawCube(vector<Point2f> pointBuf, Mat cameraMatrix, Mat distCoeffs,
     solvePnPRansac(objectPoints[0], pointBuf, cameraMatrix, distCoeffs, rvec, tvec);
     projectPoints(axis, rvec, tvec, cameraMatrix, distCoeffs, renderFrame);
 
-
+    
     for (int i = 0; i < 4; i++)
     {
         line(frame, renderFrame[i], renderFrame[(i + 1)%4], Scalar(200.0f, 200.0f, 255.0f), 2);
@@ -694,7 +697,7 @@ static bool runCalibration(Settings& s, Size& imageSize, Mat& cameraMatrix, Mat&
     else {
         distCoeffs = Mat::zeros(8, 1, CV_64F);
     }
-
+    // First camera calibration from all the images
     vector<vector<Point3f> > objectPoints(1);
     calcBoardCornerPositions(s.boardSize, s.squareSize, objectPoints[0], s.calibrationPattern);
     objectPoints[0][s.boardSize.width - 1].x = objectPoints[0][0].x + grid_width;
@@ -702,6 +705,7 @@ static bool runCalibration(Settings& s, Size& imageSize, Mat& cameraMatrix, Mat&
     vector<Point3f> newObjPointsTemp = objectPoints[0];
     int iter = 0;
    
+    // optimalImagePoints holds the current images. This vector will be reduced in every iteration
     vector<vector<Point2f>> optimalImagePoints(imagePoints.size());
     for (int i = 0; i < imagePoints.size(); i++)
     {
@@ -757,6 +761,7 @@ static bool runCalibration(Settings& s, Size& imageSize, Mat& cameraMatrix, Mat&
     totalAvgErr = computeReprojectionErrors(objectPoints, imagePoints, rvecs, tvecs, cameraMatrix,
         distCoeffs, reprojErrs, s.useFisheye);
     cout << "Re-projection error reported by calibrateCamera: " << totalAvgErr << endl;
+    // Initialization for the needed variables
     float maxError = totalAvgErr;
     Mat bestCameraMatrix = cameraMatrix;
     Mat bestDistCoeffs = distCoeffs;
@@ -768,7 +773,7 @@ static bool runCalibration(Settings& s, Size& imageSize, Mat& cameraMatrix, Mat&
         
         float bestError = 1000.0f;
         int bestCandidate = -1;
-        
+        // Iterates over all current images to find the worst candidate (the image that if removed will produce the least error)
         for (int j = 0; j < optimalImagePoints.size(); j++)
         {
             int imagePointsSize = optimalImagePoints.size() - 1;
@@ -823,6 +828,7 @@ static bool runCalibration(Settings& s, Size& imageSize, Mat& cameraMatrix, Mat&
             objectPoints.resize(imagePointsSize, newObjPoints);
             totalAvgErr = computeReprojectionErrors(objectPoints, imagePointsMinusOne, rvecs, tvecs, cameraMatrix,
                 distCoeffs, reprojErrs, s.useFisheye);
+            // Store if is the best so far
             if (totalAvgErr < bestError)
             {
                 bestCameraMatrix = cameraMatrix;
@@ -834,6 +840,7 @@ static bool runCalibration(Settings& s, Size& imageSize, Mat& cameraMatrix, Mat&
             }
         }
         
+        // After we find the image to be removed, we update the vector that holds the rest of the images
         vector<vector<Point2f>> temp;
         for (int i = 0; i < optimalImagePoints.size(); i++)
         {
@@ -851,7 +858,7 @@ static bool runCalibration(Settings& s, Size& imageSize, Mat& cameraMatrix, Mat&
        
 
         
-
+        // Loop that rejects images ends, when we reach the optimal error, or the error does not improve beyond an epsilon value, or we discard half the images.
         if (bestError > maxError || abs(bestError - maxError) < 0.001f || optimalImagePoints.size() == imagePoints.size() / 2) 
             break;
         else
