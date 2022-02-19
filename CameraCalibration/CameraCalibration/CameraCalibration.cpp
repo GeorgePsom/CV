@@ -1,3 +1,5 @@
+#define _CRT_SECURE_NO_WARNINGS
+
 #include <iostream>
 #include <sstream>
 #include <string>
@@ -14,7 +16,6 @@
 
 using namespace cv;
 using namespace std;
-
 class Settings
 {
 public:
@@ -764,7 +765,7 @@ static bool runCalibration(Settings& s, Size& imageSize, Mat& cameraMatrix, Mat&
 
     for (;;)
     {
-        break;
+        
         float bestError = 1000.0f;
         int bestCandidate = -1;
         
