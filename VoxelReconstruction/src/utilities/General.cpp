@@ -17,7 +17,7 @@ namespace nl_uu_science_gmt
 const string General::CBConfigFile         = "checkerboard.xml";
 const string General::CalibrationVideo     = "calibration.avi";
 const string General::CheckerboadVideo     = "checkerboard.avi";
-const string General::BackgroundImageFile  = "background.png";
+const string General::BackgroundImageFile  = "background.avi";
 const string General::VideoFile            = "video.avi";
 const string General::IntrinsicsFile       = "intrinsics.xml";
 const string General::CheckerboadCorners   = "boardcorners.xml";
