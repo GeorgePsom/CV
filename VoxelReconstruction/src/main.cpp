@@ -12,7 +12,7 @@ int main(
 		int argc, char** argv)
 {
 	VoxelReconstruction::showKeys();
-	CameraCalibration cameraCalibration("data/cam1/intrinsics.avi");
+	CameraCalibration cameraCalibration("data/cam1/intrinsics.avi", "data/cam1/intrinsics.xml");
 	//VoxelReconstruction vr("data" + std::string(PATH_SEP), 4);
 	//vr.run(argc, argv);
 

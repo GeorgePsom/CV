@@ -1,6 +1,6 @@
 #include "CameraCalibration.h"
 
-CameraCalibration::CameraCalibration(const std::string& videoPath) :
+CameraCalibration::CameraCalibration(const std::string& videoPath, const std::string& outPath) :
     s(videoPath)
 {
     vector<vector<Point2f> > imagePoints;
@@ -17,10 +17,10 @@ CameraCalibration::CameraCalibration(const std::string& videoPath) :
         if (imageSize.width == 0)
             imageSize = view.size();
 
-        if (view.empty())
+        if (view.empty() || counter==30)
         {
             std::cout << "Nr of frames: " << counter << std::endl;
-            //runCalibrationAndSave(s, imageSize, imagePoints, grid_width);
+            runCalibrationAndSave(s, imageSize, imagePoints, grid_width, outPath);
             waitKey();
         }
 
@@ -29,7 +29,7 @@ CameraCalibration::CameraCalibration(const std::string& videoPath) :
         bool found; 
         int chessBoardFlags = CALIB_CB_ADAPTIVE_THRESH 
             | CALIB_CB_NORMALIZE_IMAGE;
-      /*  found = findChessboardCorners(view, s.boardSize, pointBuf, chessBoardFlags);
+        found = findChessboardCorners(view, s.boardSize, pointBuf, chessBoardFlags);
 
         if (found)
         {
@@ -40,7 +40,7 @@ CameraCalibration::CameraCalibration(const std::string& videoPath) :
 
             drawChessboardCorners(view, s.boardSize, Mat(pointBuf), found);
             imagePoints.push_back(pointBuf);
-        }*/
+        }
 
         
     }
@@ -61,7 +61,7 @@ Mat CameraCalibration::nextImage()
     return result;
 }
 
-bool CameraCalibration::runCalibrationAndSave(Settings& s, Size imageSize, vector<vector<Point2f>> imagePoints, float grid_width)
+bool CameraCalibration::runCalibrationAndSave(Settings& s, Size imageSize, vector<vector<Point2f>> imagePoints, float grid_width, std::string outPath)
 {
     vector<Mat> rvecs, tvecs;
     vector<float> reprojErrs;
@@ -73,10 +73,23 @@ bool CameraCalibration::runCalibrationAndSave(Settings& s, Size imageSize, vecto
     std::cout << (ok ? "Calibration succeeded" : "Calibration failed")
         << ". avg re projection error = " << totalAvgErr << endl;
 
-    /*if (ok)
-        saveCameraParams(s, imageSize, cameraMatrix, distCoeffs, rvecs, tvecs, reprojErrs, imagePoints,
-            totalAvgErr, newObjPoints);*/
+
+
+    if (ok)
+        SaveCameraParams(outPath);
     return ok;
+}
+
+bool CameraCalibration::SaveCameraParams(std::string outPath)
+{
+
+    FileStorage fs(outPath, FileStorage::WRITE);
+
+
+    fs << "cameraMatrix" << cameraMatrix << "distCoeffs" << distCoeffs;
+    fs.release();
+
+    return 0;
 }
 
 
