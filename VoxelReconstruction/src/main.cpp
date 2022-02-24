@@ -20,8 +20,8 @@ int main(
 	CameraCalibration cameraCalibration3("data/cam3/intrinsics.avi", "data/cam3/intrinsics.xml");
 	std::cout << "Camera 3 calibration finished" << std::endl;
 	CameraCalibration cameraCalibration4("data/cam4/intrinsics.avi", "data/cam4/intrinsics.xml");
-	std::cout << "Camera 4 calibration finished" << std::endl;*/
-	waitKey();
+	std::cout << "Camera 4 calibration finished" << std::endl;
+	waitKey();*/
 	VoxelReconstruction vr("data" + std::string(PATH_SEP), 4);
 	vr.run(argc, argv);
 

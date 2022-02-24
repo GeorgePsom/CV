@@ -95,11 +95,15 @@ bool CameraCalibration::runCalibrationAndSave(Settings& s, Size imageSize, vecto
 
 bool CameraCalibration::SaveCameraParams(std::string outPath)
 {
-
+    Mat newCameraMatrix, newDistCoeffs;
+    cameraMatrix.convertTo(newCameraMatrix, CV_32F);
+    distCoeffs.convertTo(newDistCoeffs, CV_32F);
+    
+    
     FileStorage fs(outPath, FileStorage::WRITE);
 
 
-    fs << "cameraMatrix" << cameraMatrix << "distCoeffs" << distCoeffs;
+    fs << "CameraMatrix" << newCameraMatrix << "DistortionCoeffs" << newDistCoeffs;
     fs.release();
 
     return 0;
