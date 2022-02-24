@@ -12,15 +12,8 @@ CameraCalibration::CameraCalibration(const std::string& videoPath, const std::st
     for (;;)
     {
         
-        char key = waitKey(1000.0f / 30.0f);
-       /* while (counter < 20)
-        {
-            view = nextImage();
-            if (counter++ == 0)
-                break;
-            
-        }
-        counter = counter == 20 ? 0 : counter;*/
+        char key = waitKey(1000.0f / 900.0f);
+       
        
         if (imageSize.width == 0)
             imageSize = view.size();

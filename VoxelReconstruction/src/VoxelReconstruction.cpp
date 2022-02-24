@@ -45,22 +45,22 @@ VoxelReconstruction::VoxelReconstruction(const string &dp, const int cva) :
 		 */
 		std::cout << full_path.str() << General::BackgroundImageFile << std::endl;
 		std::cout << full_path.str() << General::VideoFile << std::endl;
-		assert(
+		/*assert(
 			General::fexists(full_path.str() + General::BackgroundImageFile)
 			&&
 			General::fexists(full_path.str() + General::VideoFile)
-		);
+		);*/
 
 		/*
 		 * Assert that if there's no config.xml file, there's an intrinsics file and
 		 * a checkerboard video to create the extrinsics from
 		 */
-		assert(
+		/*assert(
 			(!General::fexists(full_path.str() + General::ConfigFile) ?
 				General::fexists(full_path.str() + General::IntrinsicsFile) &&
 					General::fexists(full_path.str() + General::CheckerboadVideo)
 			 : true)
-		);
+		);*/
 
 		m_cam_views.push_back(new Camera(full_path.str(), General::ConfigFile, v));
 	}
