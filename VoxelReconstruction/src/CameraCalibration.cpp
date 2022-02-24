@@ -6,22 +6,30 @@ CameraCalibration::CameraCalibration(const std::string& videoPath, const std::st
     vector<vector<Point2f> > imagePoints;
     int grid_width = s.squareSize * (s.boardSize.width - 1);
     namedWindow("Test", WINDOW_AUTOSIZE);
-    Mat view;
+    Mat view = nextImage();;
     Size imageSize = Size(0,0);
-    int counter = 0;
+    int counter = 1;
     for (;;)
     {
-        counter++;
-        char key = waitKey(1000.0f / 900.0f);
-        view = nextImage();
+        
+        char key = waitKey(1000.0f / 30.0f);
+       /* while (counter < 20)
+        {
+            view = nextImage();
+            if (counter++ == 0)
+                break;
+            
+        }
+        counter = counter == 20 ? 0 : counter;*/
+       
         if (imageSize.width == 0)
             imageSize = view.size();
 
-        if (view.empty() || counter==30)
+        if (view.empty())
         {
-            std::cout << "Nr of frames: " << counter << std::endl;
+            std::cout << "Nr of frames: " << imagePoints.size() << std::endl;
             runCalibrationAndSave(s, imageSize, imagePoints, grid_width, outPath);
-            waitKey();
+            break;
         }
 
 
@@ -41,7 +49,13 @@ CameraCalibration::CameraCalibration(const std::string& videoPath, const std::st
             drawChessboardCorners(view, s.boardSize, Mat(pointBuf), found);
             imagePoints.push_back(pointBuf);
         }
+        while (counter < 20)
+        {
+            view = nextImage();
+            counter++;
 
+        }
+        counter = counter == 20 ? 1 : counter;
         
     }
 }
