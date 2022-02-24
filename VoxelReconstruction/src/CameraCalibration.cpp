@@ -49,13 +49,19 @@ CameraCalibration::CameraCalibration(const std::string& videoPath, const std::st
             drawChessboardCorners(view, s.boardSize, Mat(pointBuf), found);
             imagePoints.push_back(pointBuf);
         }
-        while (counter < 20)
+        if (found)
         {
-            view = nextImage();
-            counter++;
+            while (counter < 15)
+            {
+                view = nextImage();
+                counter++;
 
+            }
+            counter = counter == 15 ? 1 : counter;
         }
-        counter = counter == 20 ? 1 : counter;
+        else
+            view = nextImage();
+       
         
     }
 }
