@@ -9,6 +9,7 @@
 
 #include <opencv2/highgui/highgui.hpp>
 #include <opencv2/highgui/highgui_c.h>
+#include <opencv2/imgproc.hpp >
 #include <stddef.h>
 #include <cassert>
 #include <iostream>
@@ -39,28 +40,55 @@ VoxelReconstruction::VoxelReconstruction(const string &dp, const int cva) :
 		stringstream full_path;
 		full_path << cam_path << (v + 1) << PATH_SEP;
 
+
 		/*
 		 * Assert that there's a background image or video file and \
 		 * that there's a video file
 		 */
+		VideoCapture videoCapture;
+		videoCapture.open(full_path.str() + "background.avi");
+		Mat frame;
+		videoCapture >> frame;
+		frame.convertTo(frame, CV_32F);
+		Mat averageBackground = Mat::zeros(frame.size(), frame.type());
+		Mat averageBackground1 = Mat::ones(frame.size(), CV_32F);
+		accumulate(frame, averageBackground);
+		int nrFrames = 1;
+		while (true)
+		{
+			if (videoCapture.isOpened())
+			{
+				Mat frame;
+				videoCapture >> frame;
+				if (frame.empty())
+					break;
+				accumulate(frame, averageBackground);
+				nrFrames++;
+
+			}
+
+		}
+		
+		averageBackground = averageBackground / nrFrames;
+		imwrite(full_path.str() + "background.png", averageBackground);
 		std::cout << full_path.str() << General::BackgroundImageFile << std::endl;
 		std::cout << full_path.str() << General::VideoFile << std::endl;
-		/*assert(
+		assert(
 			General::fexists(full_path.str() + General::BackgroundImageFile)
 			&&
 			General::fexists(full_path.str() + General::VideoFile)
-		);*/
+		);
 
 		/*
 		 * Assert that if there's no config.xml file, there's an intrinsics file and
 		 * a checkerboard video to create the extrinsics from
 		 */
-		/*assert(
+		assert(
 			(!General::fexists(full_path.str() + General::ConfigFile) ?
 				General::fexists(full_path.str() + General::IntrinsicsFile) &&
 					General::fexists(full_path.str() + General::CheckerboadVideo)
 			 : true)
-		);*/
+		);
 
 		m_cam_views.push_back(new Camera(full_path.str(), General::ConfigFile, v));
 	}

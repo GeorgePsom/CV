@@ -68,6 +68,78 @@ Scene3DRenderer::Scene3DRenderer(
 	const int H = 127;
 	const int S = 127;
 	const int V = 127;
+
+	Mat hsv_image;
+	
+	cvtColor(m_cameras[0]->getFrame(), hsv_image, CV_BGR2HSV);  // from BGR to HSV color space
+
+	vector<Mat> channels;
+	split(hsv_image, channels);  // Split the HSV-channels for further analysis
+
+	// Background subtraction V
+	int max = 0;
+	for (int v = 0; v < 255; v++)
+	{
+		Mat tmp, foreground, background;
+		absdiff(channels[2], /*paint*/, tmp);
+		threshold(tmp, foreground, v, 255, CV_THRESH_BINARY);
+		bitwise_xor(foreground, background, foreground);
+		int nCorrectPixels = countNonZero(foreground);
+		if (nCorrectPixels > max)
+		{
+			max = nCorrectPixels;
+			m_v_threshold = v;
+			m_pv_threshold = v;
+		}
+	}
+
+	int max = 0;
+	for (int s = 0; s < 255; s++)
+	{
+		Mat tmp, foreground, background;
+		absdiff(channels[1], /*paint*/, tmp);
+		threshold(tmp, foreground, s, 255, CV_THRESH_BINARY);
+		bitwise_xor(foreground, background, foreground);
+		int nCorrectPixels = countNonZero(foreground);
+		if (nCorrectPixels > max)
+		{
+			max = nCorrectPixels;
+			m_s_threshold = s;
+			m_ps_threshold = s;
+		}
+	}
+
+	int max = 0;
+	for (int h = 0; h < 255; h++)
+	{
+		Mat tmp, foreground, background;
+		absdiff(channels[0], /*paint*/, tmp);
+		threshold(tmp, foreground, h, 255, CV_THRESH_BINARY);
+		bitwise_xor(foreground, background, foreground);
+		int nCorrectPixels = countNonZero(foreground);
+		if (nCorrectPixels > max)
+		{
+			max = nCorrectPixels;
+			m_h_threshold = h;
+			m_ph_threshold = h;
+
+		}
+	}
+	//Mat tmp, foreground, background;
+	//absdiff(channels[0], cameras[0]->getBgHsvChannels().at(0), tmp);
+	//threshold(tmp, foreground, m_h_threshold, 255, CV_THRESH_BINARY);
+
+	//// Background subtraction S
+	//absdiff(channels[1], camera->getBgHsvChannels().at(1), tmp);
+	//threshold(tmp, background, m_s_threshold, 255, CV_THRESH_BINARY);
+	//bitwise_and(foreground, background, foreground);
+
+
+	//// Background subtraction V
+	//absdiff(channels[2], camera->getBgHsvChannels().at(2), tmp);
+	//threshold(tmp, background, m_v_threshold, 255, CV_THRESH_BINARY);
+	//bitwise_or(foreground, background, foreground);
+
 	m_h_threshold = H;
 	m_ph_threshold = H;
 	m_s_threshold = S;
@@ -139,6 +211,7 @@ void Scene3DRenderer::processForeground(
 	absdiff(channels[1], camera->getBgHsvChannels().at(1), tmp);
 	threshold(tmp, background, m_s_threshold, 255, CV_THRESH_BINARY);
 	bitwise_and(foreground, background, foreground);
+	
 
 	// Background subtraction V
 	absdiff(channels[2], camera->getBgHsvChannels().at(2), tmp);

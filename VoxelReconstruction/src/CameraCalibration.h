@@ -78,10 +78,10 @@ class CameraCalibration
 {
 public:
     CameraCalibration(const std::string& videoPath, const std::string& outPath);
-
+    Mat nextImage();
 
 private: 
-    Mat nextImage();
+    
     bool runCalibrationAndSave(Settings& s, Size imageSize, vector<vector<Point2f>> imagePoints, float grid_width, std::string outPath);
     bool  runCalibration(Settings& s, Size& imageSize, vector<vector<Point2f> > imagePoints, vector<Mat>& rvecs, vector<Mat>& tvecs,
         vector<float>& reprojErrs, double& totalAvgErr, vector<Point3f>& newObjPoints,

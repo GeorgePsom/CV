@@ -6,7 +6,7 @@ CameraCalibration::CameraCalibration(const std::string& videoPath, const std::st
     vector<vector<Point2f> > imagePoints;
     int grid_width = s.squareSize * (s.boardSize.width - 1);
     namedWindow("Test", WINDOW_AUTOSIZE);
-    Mat view = nextImage();;
+    Mat view = nextImage();
     Size imageSize = Size(0,0);
     int counter = 1;
     for (;;)
