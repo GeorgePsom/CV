@@ -41,6 +41,7 @@ VoxelReconstruction::VoxelReconstruction(const string &dp, const int cva) :
 		full_path << cam_path << (v + 1) << PATH_SEP;
 
 
+
 		/*
 		 * Assert that there's a background image or video file and \
 		 * that there's a video file

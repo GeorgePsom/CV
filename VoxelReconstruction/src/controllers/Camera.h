@@ -52,6 +52,7 @@ class Camera
 	std::vector<cv::Point3f> m_camera_floor;         // Projection of the camera itself onto the ground floor view
 
 	cv::Mat m_frame;                                 // Current video frame (image)
+	cv::Mat mask;                                 // Current video frame (image)
 
 	static void onMouse(int, int, int, int, void*);
 	void initCamLoc();
@@ -133,6 +134,11 @@ public:
 	const cv::Mat& getFrame() const
 	{
 		return m_frame;
+	}
+
+	const cv::Mat& getMask() const
+	{
+		return mask;
 	}
 
 	const std::vector<cv::Point3f>& getCameraFloor() const

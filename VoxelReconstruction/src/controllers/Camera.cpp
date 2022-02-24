@@ -75,6 +75,22 @@ bool Camera::initialize()
 	}
 	assert(!bg_image.empty());
 
+	if (General::fexists(m_data_path + General::MaskFile))
+	{
+		mask = imread(m_data_path + General::MaskFile);
+		if (mask.empty())
+		{
+			cout << "Unable to read: " << m_data_path + General::MaskFile;
+			return false;
+		}
+	}
+	else
+	{
+		cout << "Unable to find background image: " << m_data_path + General::MaskFile;
+		return false;
+	}
+	assert(!mask.empty());
+
 	// Disect the background image in HSV-color space
 	Mat bg_hsv_im;
 	cvtColor(bg_image, bg_hsv_im, CV_BGR2HSV);

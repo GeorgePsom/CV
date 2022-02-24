@@ -81,7 +81,7 @@ Scene3DRenderer::Scene3DRenderer(
 	for (int v = 0; v < 255; v++)
 	{
 		Mat tmp, foreground, background;
-		absdiff(channels[2], /*paint*/, tmp);
+		absdiff(channels[2], m_cameras[0]->getMask(), tmp);
 		threshold(tmp, foreground, v, 255, CV_THRESH_BINARY);
 		bitwise_xor(foreground, background, foreground);
 		int nCorrectPixels = countNonZero(foreground);
@@ -93,11 +93,11 @@ Scene3DRenderer::Scene3DRenderer(
 		}
 	}
 
-	int max = 0;
+	max = 0;
 	for (int s = 0; s < 255; s++)
 	{
 		Mat tmp, foreground, background;
-		absdiff(channels[1], /*paint*/, tmp);
+		absdiff(channels[1], m_cameras[0]->getMask(), tmp);
 		threshold(tmp, foreground, s, 255, CV_THRESH_BINARY);
 		bitwise_xor(foreground, background, foreground);
 		int nCorrectPixels = countNonZero(foreground);
@@ -109,11 +109,11 @@ Scene3DRenderer::Scene3DRenderer(
 		}
 	}
 
-	int max = 0;
+	max = 0;
 	for (int h = 0; h < 255; h++)
 	{
 		Mat tmp, foreground, background;
-		absdiff(channels[0], /*paint*/, tmp);
+		absdiff(channels[0], m_cameras[0]->getMask(), tmp);
 		threshold(tmp, foreground, h, 255, CV_THRESH_BINARY);
 		bitwise_xor(foreground, background, foreground);
 		int nCorrectPixels = countNonZero(foreground);
