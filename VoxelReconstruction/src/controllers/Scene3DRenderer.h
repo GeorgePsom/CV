@@ -92,6 +92,9 @@ public:
 			int);
 	void setTopView();
 
+	void Scene3DRenderer::calcThresholds(
+		Camera* camera);
+
 	const std::vector<Camera*>& getCameras() const
 	{
 		return m_cameras;

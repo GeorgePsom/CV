@@ -65,95 +65,26 @@ Scene3DRenderer::Scene3DRenderer(
 	m_current_frame = 0;
 	m_previous_frame = -1;
 
-	const int H = 127;
-	const int S = 127;
-	const int V = 127;
+	//const int H = 0;
+	//const int S = 0;
+	//const int V = 0;
 
-	Mat hsv_image;
-	
-	cvtColor(m_cameras[0]->getFrame(), hsv_image, CV_BGR2HSV);  // from BGR to HSV color space
+	//m_h_threshold = H;
+	//m_ph_threshold = H;
+	//m_s_threshold = S;
+	//m_ps_threshold = S;
+	//m_v_threshold = V;
+	//m_pv_threshold = V;
 
-	vector<Mat> channels;
-	split(hsv_image, channels);  // Split the HSV-channels for further analysis
+	createFloorGrid();
+	setTopView();
 
-	// Background subtraction V
-	int max = 0;
-	for (int v = 0; v < 255; v++)
-	{
-		Mat tmp, foreground, background;
-		absdiff(channels[2], m_cameras[0]->getMask(), tmp);
-		threshold(tmp, foreground, v, 255, CV_THRESH_BINARY);
-		bitwise_xor(foreground, background, foreground);
-		int nCorrectPixels = countNonZero(foreground);
-		if (nCorrectPixels > max)
-		{
-			max = nCorrectPixels;
-			m_v_threshold = v;
-			m_pv_threshold = v;
-		}
-	}
-
-	max = 0;
-	for (int s = 0; s < 255; s++)
-	{
-		Mat tmp, foreground, background;
-		absdiff(channels[1], m_cameras[0]->getMask(), tmp);
-		threshold(tmp, foreground, s, 255, CV_THRESH_BINARY);
-		bitwise_xor(foreground, background, foreground);
-		int nCorrectPixels = countNonZero(foreground);
-		if (nCorrectPixels > max)
-		{
-			max = nCorrectPixels;
-			m_s_threshold = s;
-			m_ps_threshold = s;
-		}
-	}
-
-	max = 0;
-	for (int h = 0; h < 255; h++)
-	{
-		Mat tmp, foreground, background;
-		absdiff(channels[0], m_cameras[0]->getMask(), tmp);
-		threshold(tmp, foreground, h, 255, CV_THRESH_BINARY);
-		bitwise_xor(foreground, background, foreground);
-		int nCorrectPixels = countNonZero(foreground);
-		if (nCorrectPixels > max)
-		{
-			max = nCorrectPixels;
-			m_h_threshold = h;
-			m_ph_threshold = h;
-
-		}
-	}
-	//Mat tmp, foreground, background;
-	//absdiff(channels[0], cameras[0]->getBgHsvChannels().at(0), tmp);
-	//threshold(tmp, foreground, m_h_threshold, 255, CV_THRESH_BINARY);
-
-	//// Background subtraction S
-	//absdiff(channels[1], camera->getBgHsvChannels().at(1), tmp);
-	//threshold(tmp, background, m_s_threshold, 255, CV_THRESH_BINARY);
-	//bitwise_and(foreground, background, foreground);
-
-
-	//// Background subtraction V
-	//absdiff(channels[2], camera->getBgHsvChannels().at(2), tmp);
-	//threshold(tmp, background, m_v_threshold, 255, CV_THRESH_BINARY);
-	//bitwise_or(foreground, background, foreground);
-
-	m_h_threshold = H;
-	m_ph_threshold = H;
-	m_s_threshold = S;
-	m_ps_threshold = S;
-	m_v_threshold = V;
-	m_pv_threshold = V;
+	calcThresholds(m_cameras[0]);
 
 	createTrackbar("Frame", VIDEO_WINDOW, &m_current_frame, m_number_of_frames - 2);
 	createTrackbar("H", VIDEO_WINDOW, &m_h_threshold, 255);
 	createTrackbar("S", VIDEO_WINDOW, &m_s_threshold, 255);
 	createTrackbar("V", VIDEO_WINDOW, &m_v_threshold, 255);
-
-	createFloorGrid();
-	setTopView();
 }
 
 /**
@@ -186,6 +117,88 @@ bool Scene3DRenderer::processFrame()
 		processForeground(m_cameras[c]);
 	}
 	return true;
+}
+
+void Scene3DRenderer::calcThresholds(
+	Camera* camera)
+{
+	Mat hsv_image;
+	
+	
+	cvtColor(camera->getVideoFrame(0), hsv_image, CV_BGR2HSV);  // from BGR to HSV color space
+
+	int pixelNum = camera->getVideoFrame(0).size().width * camera->getVideoFrame(0).size().height;
+
+	vector<Mat> channels;
+	split(hsv_image, channels);  // Split the HSV-channels for further analysis
+
+	Mat hsv_mask;
+	cvtColor(camera->getMask(), hsv_mask, CV_BGR2HSV);
+	vector<Mat> mask_channels;
+	split(hsv_mask, mask_channels);  // Split the HSV-channels for further analysis
+
+
+	int max = 0;
+	for (int v = 0; v < 255; v++)
+	{
+		Mat tmp, foreground, background;
+		absdiff(channels[2], camera->getBgHsvChannels().at(2), tmp);
+		threshold(tmp, foreground, v, 255, CV_THRESH_BINARY);
+
+		bitwise_xor(foreground, mask_channels[2], foreground);
+		int nCorrectPixels = pixelNum - countNonZero(foreground);
+		if (nCorrectPixels > max)
+		{
+			max = nCorrectPixels;
+			m_v_threshold = v;
+			m_pv_threshold = v;
+
+		}
+	}
+
+	Mat tmp, foregroundV;
+	absdiff(channels[2], camera->getBgHsvChannels().at(2), tmp);
+	threshold(tmp, foregroundV, m_v_threshold, 255, CV_THRESH_BINARY);
+
+	max = 0;
+	for (int s = 0; s < 255; s++)
+	{
+		Mat tmp, foreground, background;
+		absdiff(channels[1], camera->getBgHsvChannels().at(1), tmp);
+		threshold(tmp, foreground, s, 255, CV_THRESH_BINARY);
+		bitwise_or(foregroundV, foreground, foreground);
+		bitwise_xor(foreground, mask_channels[1], foreground);
+		int nCorrectPixels = pixelNum - countNonZero(foreground);
+		if (nCorrectPixels > max)
+		{
+			max = nCorrectPixels;
+			m_s_threshold = s;
+			m_ps_threshold = s;
+		}
+	}
+
+	Mat foregroundS;
+	absdiff(channels[1], camera->getBgHsvChannels().at(1), tmp);
+	threshold(tmp, foregroundS, m_v_threshold, 255, CV_THRESH_BINARY);
+
+
+	max = 0;
+	for (int h = 0; h < 255; h++)
+	{
+		Mat tmp, foreground, background;
+		absdiff(channels[0], camera->getBgHsvChannels().at(0), tmp);
+		threshold(tmp, foreground, h, 255, CV_THRESH_BINARY);
+		bitwise_and(foreground, foregroundS, foreground);
+		bitwise_or(foreground, foregroundV, foreground);
+		bitwise_xor(foreground, mask_channels[0], foreground);
+		int nCorrectPixels = pixelNum - countNonZero(foreground);
+		if (nCorrectPixels > max)
+		{
+			max = nCorrectPixels;
+			m_h_threshold = h;
+			m_ph_threshold = h;
+		}
+	}	
 }
 
 /**
