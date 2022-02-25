@@ -135,7 +135,7 @@ void Scene3DRenderer::calcThresholds(
 	Mat hsv_mask;
 	cvtColor(camera->getMask(), hsv_mask, CV_BGR2HSV);
 	Mat hsv_mask_dilated;
-	dilate(hsv_mask, hsv_mask_dilated, getStructuringElement(MORPH_ELLIPSE, Size(5, 5)), Point(-1, 1), 5);
+	dilate(hsv_mask, hsv_mask_dilated, getStructuringElement(MORPH_ELLIPSE, Size(15, 15)), Point(-1, 1), 5);
 	vector<Mat> mask_channels;
 	split(hsv_mask_dilated, mask_channels);  // Split the HSV-channels for further analysis
 
@@ -233,11 +233,23 @@ void Scene3DRenderer::processForeground(
 	threshold(tmp, background, m_v_threshold, 255, CV_THRESH_BINARY);
 	bitwise_or(foreground, background, foreground);
 	Mat result;
-	dilate(foreground, result, getStructuringElement(MORPH_ELLIPSE, Size(3,3)), Point(-1, 1), 2);
-	erode(result, foreground, getStructuringElement(MORPH_ELLIPSE, Size(5, 5)));
+
+	Mat greenMask;
+	inRange(hsv_image, Scalar(60, 100, 80), Scalar(88, 255, 150), greenMask);
+	bitwise_not(greenMask,greenMask);
+
+	bitwise_and(foreground, greenMask,foreground);
+
+
+	dilate(foreground, result, getStructuringElement(MORPH_ELLIPSE, Size(6,6)), Point(-1, 1));
+	//dilate(result, result, getStructuringElement(MORPH_ELLIPSE, Size(3,3)), Point(-1, 1));
+	//erode(result, result, getStructuringElement(MORPH_ELLIPSE, Size(1, 1)));
+
+	//dilate(result, result, getStructuringElement(MORPH_ELLIPSE, Size(3, 3)), Point(-1, 1));
+	
 	// Improve the foreground image
 
-	camera->setForegroundImage(foreground);
+	camera->setForegroundImage(result);
 }
 
 /**
