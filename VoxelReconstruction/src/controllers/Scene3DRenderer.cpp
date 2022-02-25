@@ -134,8 +134,10 @@ void Scene3DRenderer::calcThresholds(
 
 	Mat hsv_mask;
 	cvtColor(camera->getMask(), hsv_mask, CV_BGR2HSV);
+	Mat hsv_mask_dilated;
+	dilate(hsv_mask, hsv_mask_dilated, getStructuringElement(MORPH_ELLIPSE, Size(5, 5)), Point(-1, 1), 5);
 	vector<Mat> mask_channels;
-	split(hsv_mask, mask_channels);  // Split the HSV-channels for further analysis
+	split(hsv_mask_dilated, mask_channels);  // Split the HSV-channels for further analysis
 
 
 	int max = 0;
@@ -230,7 +232,9 @@ void Scene3DRenderer::processForeground(
 	absdiff(channels[2], camera->getBgHsvChannels().at(2), tmp);
 	threshold(tmp, background, m_v_threshold, 255, CV_THRESH_BINARY);
 	bitwise_or(foreground, background, foreground);
-
+	Mat result;
+	dilate(foreground, result, getStructuringElement(MORPH_ELLIPSE, Size(3,3)), Point(-1, 1), 2);
+	erode(result, foreground, getStructuringElement(MORPH_ELLIPSE, Size(5, 5)));
 	// Improve the foreground image
 
 	camera->setForegroundImage(foreground);
