@@ -5,7 +5,7 @@ VisualStudioVersion = 16.0.31727.386
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "VoxelReconstruction", "VoxelReconstruction.vcxproj", "{D024333B-E310-4DFB-B973-F49F08E73EB0}"
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "PolyVoxCore", "..\Libraries\PolyVox\build\library\PolyVoxCore\PolyVoxCore.vcxproj", "{C1AC58FA-A7CE-38DD-BD1B-A9C4731490A2}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "PolyVoxCore", "..\..\Libraries\PolyVox\build\library\PolyVoxCore\PolyVoxCore.vcxproj", "{C1AC58FA-A7CE-38DD-BD1B-A9C4731490A2}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
