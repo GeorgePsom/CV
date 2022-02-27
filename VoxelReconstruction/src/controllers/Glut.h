@@ -24,6 +24,7 @@
 #include "PolyVoxCore/CubicSurfaceExtractorWithNormals.h"
 #include "PolyVoxCore/MarchingCubesSurfaceExtractor.h"
 #include "PolyVoxCore/SurfaceMesh.h"
+#include "PolyVoxCore/SimpleVolume.h"
 
 namespace nl_uu_science_gmt
 {
@@ -33,7 +34,8 @@ class Scene3DRenderer;
 class Glut
 {
 	Scene3DRenderer &m_scene3d;
-	PolyVox::SurfaceMesh<PolyVox::PositionMaterialNormal> mesh;
+	/*PolyVox::SurfaceMesh<PolyVox::PositionMaterialNormal> mesh;*/
+	PolyVox::SimpleVolume<uint8_t>* volData;
 
 	static Glut* m_Glut;
 
@@ -56,7 +58,7 @@ class Glut
 
 public:
 	Glut(
-			Scene3DRenderer &, PolyVox::SurfaceMesh<PolyVox::PositionMaterialNormal>& mesh);
+			Scene3DRenderer &, PolyVox::SimpleVolume<uint8_t>& );
 	virtual ~Glut();
 
 #ifdef __linux__

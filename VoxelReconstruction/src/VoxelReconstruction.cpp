@@ -134,7 +134,7 @@ void VoxelReconstruction::showKeys()
  * - After that initialize the scene rendering classes
  * - Run it!
  */
-void VoxelReconstruction::run(int argc, char** argv, PolyVox::SurfaceMesh<PolyVox::PositionMaterialNormal>& mesh)
+void VoxelReconstruction::run(int argc, char** argv, PolyVox::SimpleVolume<uint8_t>& volData)
 {
 	for (int v = 0; v < m_cam_views_amount; ++v)
 	{
@@ -150,7 +150,7 @@ void VoxelReconstruction::run(int argc, char** argv, PolyVox::SurfaceMesh<PolyVo
 
 	Reconstructor reconstructor(m_cam_views);
 	Scene3DRenderer scene3d(reconstructor, m_cam_views);
-	Glut glut(scene3d, mesh);
+	Glut glut(scene3d, volData);
 
 #ifdef __linux__
 	glut.initializeLinux(SCENE_WINDOW.c_str(), argc, argv);

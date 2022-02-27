@@ -55,7 +55,7 @@ int main(
 		int argc, char** argv)
 {
 	SimpleVolume<uint8_t> volData(PolyVox::Region(Vector3DInt32(0, 0, 0), Vector3DInt32(127, 127, 127)));
-    createSphereInVolume(volData, 100.0f);
+    //createSphereInVolume(volData, 100.0f);
 
     SurfaceMesh<PositionMaterialNormal> mesh;
     CubicSurfaceExtractorWithNormals< SimpleVolume<uint8_t> > surfaceExtractor(&volData, volData.getEnclosingRegion(), &mesh);
@@ -73,7 +73,7 @@ int main(
 	std::cout << "Camera 4 calibration finished" << std::endl;
 	waitKey();*/
 	VoxelReconstruction vr("data" + std::string(PATH_SEP), 4);
-	vr.run(argc, argv, mesh);
+	vr.run(argc, argv, volData);
 
 	return EXIT_SUCCESS;
 }

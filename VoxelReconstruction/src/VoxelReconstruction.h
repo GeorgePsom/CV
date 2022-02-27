@@ -12,9 +12,10 @@
 #include <vector>
 
 #include "controllers/Camera.h"
-#include "PolyVoxCore/SurfaceMesh.h"
 #include "PolyVoxCore/CubicSurfaceExtractorWithNormals.h"
 #include "PolyVoxCore/MarchingCubesSurfaceExtractor.h"
+#include "PolyVoxCore/SurfaceMesh.h"
+#include "PolyVoxCore/SimpleVolume.h"
 
 
 namespace nl_uu_science_gmt
@@ -33,7 +34,7 @@ public:
 
 	static void showKeys();
 
-	void run(int, char**, PolyVox::SurfaceMesh<PolyVox::PositionMaterialNormal>& mesh);
+	void run(int, char**, PolyVox::SimpleVolume<uint8_t>& volData);
 };
 
 } /* namespace nl_uu_science_gmt */
