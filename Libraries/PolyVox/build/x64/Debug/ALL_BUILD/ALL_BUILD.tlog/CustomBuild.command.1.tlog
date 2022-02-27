@@ -1,0 +1,10 @@
+^F:\CVPROJECT\CV\LIBRARIES\POLYVOX\CMAKELISTS.TXT
+setlocal
+"D:\Program Files\cmake-3.22.2-windows-x86_64\cmake-3.22.2-windows-x86_64\bin\cmake.exe" -SF:/CVProject/CV/Libraries/PolyVox -BF:/CVProject/CV/Libraries/PolyVox/build --check-stamp-file F:/CVProject/CV/Libraries/PolyVox/build/CMakeFiles/generate.stamp
+if %errorlevel% neq 0 goto :cmEnd
+:cmEnd
+endlocal & call :cmErrorLevel %errorlevel% & goto :cmDone
+:cmErrorLevel
+exit /b %1
+:cmDone
+if %errorlevel% neq 0 goto :VCEnd

@@ -21,6 +21,9 @@
 // i am not sure about the compatibility with this...
 #define MOUSE_WHEEL_UP   3
 #define MOUSE_WHEEL_DOWN 4
+#include "PolyVoxCore/CubicSurfaceExtractorWithNormals.h"
+#include "PolyVoxCore/MarchingCubesSurfaceExtractor.h"
+#include "PolyVoxCore/SurfaceMesh.h"
 
 namespace nl_uu_science_gmt
 {
@@ -30,6 +33,7 @@ class Scene3DRenderer;
 class Glut
 {
 	Scene3DRenderer &m_scene3d;
+	PolyVox::SurfaceMesh<PolyVox::PositionMaterialNormal> mesh;
 
 	static Glut* m_Glut;
 
@@ -40,6 +44,7 @@ class Glut
 	static void drawVoxels();
 	static void drawWCoord();
 	static void drawInfo();
+	static void drawMesh();
 
 	static inline void perspectiveGL(
 			GLdouble, GLdouble, GLdouble, GLdouble);
@@ -51,7 +56,7 @@ class Glut
 
 public:
 	Glut(
-			Scene3DRenderer &);
+			Scene3DRenderer &, PolyVox::SurfaceMesh<PolyVox::PositionMaterialNormal>& mesh);
 	virtual ~Glut();
 
 #ifdef __linux__

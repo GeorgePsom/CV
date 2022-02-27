@@ -31,6 +31,11 @@
     <ClInclude Include="src\utilities\General.h" />
     <ClInclude Include="src\VoxelReconstruction.h" />
   </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Libraries\PolyVox\build\library\PolyVoxCore\PolyVoxCore.vcxproj">
+      <Project>{c1ac58fa-a7ce-38dd-bd1b-a9c4731490a2}</Project>
+    </ProjectReference>
+  </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{D024333B-E310-4DFB-B973-F49F08E73EB0}</ProjectGuid>
     <RootNamespace>OpenCVTemplate</RootNamespace>
@@ -63,11 +68,11 @@
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
-    <IncludePath>$(SolutionDir)..\..\..\..\OpenCV\opencv\build\include;$(IncludePath)</IncludePath>
+    <IncludePath>$(SolutionDir)..\..\..\..\OpenCV\opencv\build\include;$(SolutionDir)..\Libraries\PolyVox\library\PolyVoxCore\include;$(IncludePath)</IncludePath>
     <LibraryPath>$(VC_LibraryPath_x64);$(WindowsSDK_LibraryPath_x64);$(SolutionDir)..\..\..\..\OpenCV\opencv\build\x64\vc15\lib;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
-    <IncludePath>$(SolutionDir)..\..\..\..\OpenCV\opencv\build\include;$(IncludePath)</IncludePath>
+    <IncludePath>$(SolutionDir)..\..\..\..\OpenCV\opencv\build\include;$(SolutionDir)..\Libraries\PolyVox\library\PolyVoxCore\include;$(IncludePath)</IncludePath>
     <LibraryPath>$(VC_LibraryPath_x64);$(WindowsSDK_LibraryPath_x64);$(SolutionDir)..\..\..\..\OpenCV\opencv\build\x64\vc15\lib;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
