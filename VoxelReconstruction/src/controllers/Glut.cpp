@@ -856,6 +856,30 @@ void Glut::drawArcball()
  */
 void Glut::drawVoxels()
 {
+	vector<Reconstructor::Voxel*> voxels = m_Glut->getScene3d().getReconstructor().getVisibleVoxels();
+	const vector<Camera*>& cameras = m_Glut->getScene3d().getCameras();
+	vector<Mat> images;
+	vector<Point3f> c_locations;
+	float dist;
+
+	float minx = 1000.0f, maxx = 0, miny = 1000.0f, maxy = 0;
+
+	for (size_t v = 0; v < voxels.size(); v++)
+	{
+		if (voxels[v]->x < minx) minx = voxels[v]->x;
+		if (voxels[v]->x > maxx) maxx = voxels[v]->x;
+		if (voxels[v]->y < miny) miny = voxels[v]->y;
+		if (voxels[v]->y > maxy) maxy = voxels[v]->y;
+	}
+
+	for (size_t v = 0; v < cameras.size(); v++)
+	{
+		images.push_back(cameras[v]->getVideoFrame(m_Glut->getScene3d().getCurrentFrame()));
+		c_locations.push_back(cameras[v]->getCameraLocation());
+	}
+
+	Point3f center((maxx + minx) / 2, (maxy + miny) / 2, 0);
+	
 	glPushMatrix();
 
 	// apply default translation
@@ -885,18 +909,69 @@ void Glut::drawVoxels()
 	}*/
 	
 	PolyVox::SimpleVolume<uint8_t> volData(PolyVox::Region(PolyVox::Vector3DInt32(0, 0, 0), PolyVox::Vector3DInt32(127,127,127)));
-	vector<Reconstructor::Voxel*> voxels = m_Glut->getScene3d().getReconstructor().getVisibleVoxels();
+	
 	for (size_t v = 0; v < voxels.size(); v++)
 	{
+		float distCam, distCent;
+		float col_x, col_y, col_z;
+		bool found = false;
+
+		vector<int> closer;
+
+		for (int i = 0; i < cameras.size(); i++)
+		{
+
+			distCam = (int(c_locations[i].x) - voxels[v]->x) ^ 2 + (int(c_locations[i].y) - voxels[v]->y) ^ 2;
+
+			distCent = (int(center.x) - int(c_locations[i].x)) ^ 2 + (int(center.y) - int(c_locations[i].y)) ^ 2;
+
+			if (distCam <= distCent) {
+				closer.push_back(i);
+				found = true;
+			}
+		}
+
+		if (found == true)
+		{
+			float min = 10000.0f;
+			int ind;
+
+			for (int i = 0; i < cameras.size(); i++)
+			{
+				distCam = (int(c_locations[i].x) - voxels[v]->x) ^ 2 + (int(c_locations[i].y) - voxels[v]->y) ^ 2;
+
+				if (distCam < min)
+				{
+					min = distCam;
+					ind = i;
+				}
+			}
+
+			col_x = images[ind].at<Vec3b>(voxels[v]->camera_projection[ind].y, voxels[v]->camera_projection[ind].x)[0];
+			col_y = images[ind].at<Vec3b>(voxels[v]->camera_projection[ind].y, voxels[v]->camera_projection[ind].x)[1];
+			col_z = images[ind].at<Vec3b>(voxels[v]->camera_projection[ind].y, voxels[v]->camera_projection[ind].x)[2];
+
+			glColor4f(col_z / 255, col_y / 255, col_x / 255, 1.0f);
+		}
+		else
+		{
+			col_x = images[0].at<Vec3b>(voxels[v]->camera_projection[0].y, voxels[v]->camera_projection[0].x)[0];
+			col_y = images[0].at<Vec3b>(voxels[v]->camera_projection[0].y, voxels[v]->camera_projection[0].x)[1];
+			col_z = images[0].at<Vec3b>(voxels[v]->camera_projection[0].y, voxels[v]->camera_projection[0].x)[2];
+		}
+		
 		volData.setVoxelAt(voxels[v]->x/32, voxels[v]->y/32, voxels[v]->z/32, 255);
+		
 		if (!m_Glut->bMesh)
 		{
-			glColor4f(0.5f, 0.5f, 0.5f, 0.5f);
+			//glColor4f(0.5f, 0.5f, 0.5f, 0.5f);
 			glVertex3f((GLfloat)voxels[v]->x, (GLfloat)voxels[v]->y, (GLfloat)voxels[v]->z);
 		}
 		
 		
 	}
+	
+	
 	if (m_Glut->bMesh)
 	{
 		PolyVox::SurfaceMesh<PolyVox::PositionMaterialNormal> mesh;

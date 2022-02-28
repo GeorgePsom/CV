@@ -95,6 +95,8 @@ public:
 	void Scene3DRenderer::calcThresholds(
 		Camera* camera);
 
+	cv::Mat Scene3DRenderer::imgProcPipeline(cv::Mat hsv_image, cv::Mat foreground);
+
 	const std::vector<Camera*>& getCameras() const
 	{
 		return m_cameras;

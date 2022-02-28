@@ -119,12 +119,14 @@ bool Scene3DRenderer::processFrame()
 	return true;
 }
 
+
+
 void Scene3DRenderer::calcThresholds(
 	Camera* camera)
 {
 	Mat hsv_image;
-	
-	
+
+
 	cvtColor(camera->getVideoFrame(0), hsv_image, CV_BGR2HSV);  // from BGR to HSV color space
 
 	int pixelNum = camera->getVideoFrame(0).size().width * camera->getVideoFrame(0).size().height;
@@ -135,9 +137,10 @@ void Scene3DRenderer::calcThresholds(
 	Mat hsv_mask;
 	cvtColor(camera->getMask(), hsv_mask, CV_BGR2HSV);
 	Mat hsv_mask_dilated;
-	dilate(hsv_mask, hsv_mask_dilated, getStructuringElement(MORPH_ELLIPSE, Size(15, 15)), Point(-1, 1), 5);
+	dilate(hsv_mask, hsv_mask_dilated, getStructuringElement(MORPH_ELLIPSE, Size(2, 2)), Point(-1, 1), 5);
 	vector<Mat> mask_channels;
-	split(hsv_mask_dilated, mask_channels);  // Split the HSV-channels for further analysis
+	split(hsv_mask_dilated, mask_channels);
+	//split(hsv_mask, mask_channels);  // Split the HSV-channels for further analysis
 
 
 	int max = 0;
@@ -148,6 +151,10 @@ void Scene3DRenderer::calcThresholds(
 		threshold(tmp, foreground, v, 255, CV_THRESH_BINARY);
 
 		bitwise_xor(foreground, mask_channels[2], foreground);
+
+		Mat result = imgProcPipeline(hsv_image, foreground);
+		foreground = result;
+
 		int nCorrectPixels = pixelNum - countNonZero(foreground);
 		if (nCorrectPixels > max)
 		{
@@ -168,8 +175,12 @@ void Scene3DRenderer::calcThresholds(
 		Mat tmp, foreground, background;
 		absdiff(channels[1], camera->getBgHsvChannels().at(1), tmp);
 		threshold(tmp, foreground, s, 255, CV_THRESH_BINARY);
-		bitwise_or(foregroundV, foreground, foreground);
+		//bitwise_or(foregroundV, foreground, foreground);
 		bitwise_xor(foreground, mask_channels[1], foreground);
+
+		Mat result = imgProcPipeline(hsv_image, foreground);
+		foreground = result;
+
 		int nCorrectPixels = pixelNum - countNonZero(foreground);
 		if (nCorrectPixels > max)
 		{
@@ -190,9 +201,13 @@ void Scene3DRenderer::calcThresholds(
 		Mat tmp, foreground, background;
 		absdiff(channels[0], camera->getBgHsvChannels().at(0), tmp);
 		threshold(tmp, foreground, h, 255, CV_THRESH_BINARY);
-		bitwise_and(foreground, foregroundS, foreground);
-		bitwise_or(foreground, foregroundV, foreground);
+		//bitwise_and(foreground, foregroundS, foreground);
+		//bitwise_or(foreground, foregroundV, foreground);
 		bitwise_xor(foreground, mask_channels[0], foreground);
+
+		Mat result = imgProcPipeline(hsv_image, foreground);
+		foreground = result;
+
 		int nCorrectPixels = pixelNum - countNonZero(foreground);
 		if (nCorrectPixels > max)
 		{
@@ -200,7 +215,110 @@ void Scene3DRenderer::calcThresholds(
 			m_h_threshold = h;
 			m_ph_threshold = h;
 		}
-	}	
+	}
+}
+
+/**
+ * Image Processing pipeline
+ */
+Mat Scene3DRenderer::imgProcPipeline(Mat hsv_image, Mat foreground)
+{
+
+	Mat greenMask;
+	inRange(hsv_image, Scalar(60, 100, 80), Scalar(88, 255, 150), greenMask);
+	bitwise_not(greenMask, greenMask);
+
+	bitwise_and(foreground, greenMask, foreground);
+
+	//erode(foreground, foreground, getStructuringElement(MORPH_ELLIPSE, Size(4, 4)), Point(-1, 1));
+
+
+	vector<vector<Point> > contours;
+	vector<Vec4i> hierarchy;
+
+	findContours(foreground, contours, hierarchy,
+		RETR_CCOMP, CHAIN_APPROX_SIMPLE);
+
+	if (!contours.empty()) {
+		int maxSize = 0;
+
+		int idx = 0, maxInd = 0;
+
+		for (idx = 0; idx < contours.size(); idx++)
+		{
+			if (contours[idx].size() > maxSize)
+			{
+				maxSize = contours[idx].size();
+				maxInd = idx;
+			}
+		}
+
+		drawContours(foreground, contours, maxInd, 255, FILLED);
+
+	}
+
+	vector<vector<Point> > contoursNew;
+	vector<Vec4i> hierarchyNew;
+
+	findContours(foreground, contoursNew, hierarchyNew,
+		RETR_CCOMP, CHAIN_APPROX_SIMPLE);
+
+	if (!contoursNew.empty()) {
+		int maxSize = 0;
+
+		int idx = 0, maxInd = 0;
+
+		for (idx = 0; idx < contoursNew.size(); idx++)
+		{
+			if (contoursNew[idx].size() > maxSize)
+			{
+				maxSize = contoursNew[idx].size();
+				maxInd = idx;
+			}
+		}
+
+		for (idx = 0; idx < contoursNew.size(); idx++)
+		{
+			if (idx != maxInd /* && contours[idx].size()<10*/)
+			{
+				drawContours(foreground, contoursNew, idx, 0, FILLED);
+			}
+		}
+
+		drawContours(foreground, contoursNew, maxInd, 255, FILLED);
+	}
+
+	dilate(foreground, foreground, getStructuringElement(MORPH_ELLIPSE, Size(4, 4)), Point(-1, 1));
+
+	findContours(foreground, contoursNew, hierarchyNew,
+		RETR_CCOMP, CHAIN_APPROX_SIMPLE);
+
+	if (!contoursNew.empty()) {
+		int maxSize = 0;
+
+		int idx = 0, maxInd = 0;
+
+		for (idx = 0; idx < contoursNew.size(); idx++)
+		{
+			if (contoursNew[idx].size() > maxSize)
+			{
+				maxSize = contoursNew[idx].size();
+				maxInd = idx;
+			}
+		}
+
+		drawContours(foreground, contoursNew, maxInd, 255, FILLED);
+	}
+
+	inRange(hsv_image, Scalar(55, 100, 80), Scalar(85, 255, 200), greenMask);
+	bitwise_not(greenMask, greenMask);
+	bitwise_and(foreground, greenMask, foreground);
+
+	//dilate(foreground, foreground, getStructuringElement(MORPH_ELLIPSE, Size(3, 3)), Point(-1, 1));
+
+	//erode(foreground, foreground, getStructuringElement(MORPH_RECT, Size(2, 2)), Point(-1, 1));
+
+	return foreground;
 }
 
 /**
@@ -208,7 +326,7 @@ void Scene3DRenderer::calcThresholds(
  * ie.: Create an 8 bit image where only the foreground of the scene is white (255)
  */
 void Scene3DRenderer::processForeground(
-		Camera* camera)
+	Camera* camera)
 {
 	assert(!camera->getFrame().empty());
 	Mat hsv_image;
@@ -226,7 +344,7 @@ void Scene3DRenderer::processForeground(
 	absdiff(channels[1], camera->getBgHsvChannels().at(1), tmp);
 	threshold(tmp, background, m_s_threshold, 255, CV_THRESH_BINARY);
 	bitwise_and(foreground, background, foreground);
-	
+
 
 	// Background subtraction V
 	absdiff(channels[2], camera->getBgHsvChannels().at(2), tmp);
@@ -234,20 +352,7 @@ void Scene3DRenderer::processForeground(
 	bitwise_or(foreground, background, foreground);
 	Mat result;
 
-	Mat greenMask;
-	inRange(hsv_image, Scalar(60, 100, 80), Scalar(88, 255, 150), greenMask);
-	bitwise_not(greenMask,greenMask);
-
-	bitwise_and(foreground, greenMask,foreground);
-
-
-	dilate(foreground, result, getStructuringElement(MORPH_ELLIPSE, Size(6,6)), Point(-1, 1));
-	//dilate(result, result, getStructuringElement(MORPH_ELLIPSE, Size(3,3)), Point(-1, 1));
-	//erode(result, result, getStructuringElement(MORPH_ELLIPSE, Size(1, 1)));
-
-	//dilate(result, result, getStructuringElement(MORPH_ELLIPSE, Size(3, 3)), Point(-1, 1));
-	
-	// Improve the foreground image
+	result = imgProcPipeline(hsv_image, foreground);
 
 	camera->setForegroundImage(result);
 }
