@@ -78,20 +78,22 @@ void Reconstructor::initialize()
 
 	// Save the 8 volume corners
 	// bottom
-	m_corners.push_back(new Point3f((float) xL, (float) yL, (float) zL));
-	m_corners.push_back(new Point3f((float) xL, (float) yR, (float) zL));
-	m_corners.push_back(new Point3f((float) xR, (float) yR, (float) zL));
-	m_corners.push_back(new Point3f((float) xR, (float) yL, (float) zL));
+	m_corners.push_back(new Point3f((float)xL, (float)yL, (float)zL));
+	m_corners.push_back(new Point3f((float)xL, (float)yR, (float)zL));
+	m_corners.push_back(new Point3f((float)xR, (float)yR, (float)zL));
+	m_corners.push_back(new Point3f((float)xR, (float)yL, (float)zL));
 
 	// top
-	m_corners.push_back(new Point3f((float) xL, (float) yL, (float) zR));
-	m_corners.push_back(new Point3f((float) xL, (float) yR, (float) zR));
-	m_corners.push_back(new Point3f((float) xR, (float) yR, (float) zR));
-	m_corners.push_back(new Point3f((float) xR, (float) yL, (float) zR));
+	m_corners.push_back(new Point3f((float)xL, (float)yL, (float)zR));
+	m_corners.push_back(new Point3f((float)xL, (float)yR, (float)zR));
+	m_corners.push_back(new Point3f((float)xR, (float)yR, (float)zR));
+	m_corners.push_back(new Point3f((float)xR, (float)yL, (float)zR));
 
 	// Acquire some memory for efficiency
 	cout << "Initializing " << m_voxels_amount << " voxels ";
 	m_voxels.resize(m_voxels_amount);
+
+	m_inforeground_voxels.resize(m_voxels_amount);
 
 	int z;
 	int pdone = 0;
@@ -99,7 +101,7 @@ void Reconstructor::initialize()
 	for (z = zL; z < zR; z += m_step)
 	{
 		const int zp = (z - zL) / m_step;
-		int done = cvRound((zp * plane / (double) m_voxels_amount) * 100.0);
+		int done = cvRound((zp * plane / (double)m_voxels_amount) * 100.0);
 
 #pragma omp critical
 		if (done > pdone)
@@ -124,23 +126,46 @@ void Reconstructor::initialize()
 				voxel->z = z;
 				voxel->camera_projection = vector<Point>(m_cameras.size());
 				voxel->valid_camera_projection = vector<int>(m_cameras.size(), 0);
+				voxel->color = { 0.5f, 0.5f, 0.5f };
+
+
+				const int frontInd = (zp)*plane + (yp)*plane_x + xp - 1;
+
+				const int leftInd = (zp)*plane + (yp + 1) * plane_x + xp;
+
+				const int rightInd = (zp)*plane + (yp - 1) * plane_x + xp;
+
+				if (frontInd > 0 && frontInd < m_voxels.size()) {
+					voxel->frontInd = frontInd;
+				}
+
+				if (leftInd > 0 && leftInd < m_voxels.size()) {
+					voxel->leftInd = leftInd;
+				}
+
+				if (rightInd > 0 && rightInd < m_voxels.size()) {
+					voxel->rightInd = rightInd;
+				}
 
 				const int p = zp * plane + yp * plane_x + xp;  // The voxel's index
 
 				for (size_t c = 0; c < m_cameras.size(); ++c)
 				{
-					Point point = m_cameras[c]->projectOnView(Point3f((float) x, (float) y, (float) z));
+					Point point = m_cameras[c]->projectOnView(Point3f((float)x, (float)y, (float)z));
 
 					// Save the pixel coordinates 'point' of the voxel projection on camera 'c'
-					voxel->camera_projection[(int) c] = point;
+					voxel->camera_projection[(int)c] = point;
 
 					// If it's within the camera's FoV, flag the projection
 					if (point.x >= 0 && point.x < m_plane_size.width && point.y >= 0 && point.y < m_plane_size.height)
-						voxel->valid_camera_projection[(int) c] = 1;
+					{
+						voxel->valid_camera_projection[(int)c] = 1;
+					}
 				}
 
 				//Writing voxel 'p' is not critical as it's unique (thread safe)
 				m_voxels[p] = voxel;
+				m_inforeground_voxels[p] = false;
 			}
 		}
 	}
@@ -155,12 +180,32 @@ void Reconstructor::initialize()
  */
 void Reconstructor::update()
 {
+	const int xL = -m_height;
+	const int xR = m_height;
+	const int yL = -m_height;
+	const int yR = m_height;
+	const int zL = 0;
+	const int zR = m_height;
+	const int plane_y = (yR - yL) / m_step;
+	const int plane_x = (xR - xL) / m_step;
+	const int plane = plane_y * plane_x;
+
+	for (int i = 0; i < m_visible_voxels.size(); i++)
+	{
+		const int zp = (m_visible_voxels[i]->z - zL) / m_step;
+		const int yp = (m_visible_voxels[i]->y - yL) / m_step;
+		const int xp = (m_visible_voxels[i]->x - xL) / m_step;
+		if (zp * plane + yp * plane_x + xp < m_inforeground_voxels.size()) {
+			m_inforeground_voxels[zp * plane + yp * plane_x + xp] = false;
+		}
+	}
+
 	m_visible_voxels.clear();
 	std::vector<Voxel*> visible_voxels;
 
 	int v;
 #pragma omp parallel for schedule(static) private(v) shared(visible_voxels)
-	for (v = 0; v < (int) m_voxels_amount; ++v)
+	for (v = 0; v < (int)m_voxels_amount; ++v)
 	{
 		int camera_counter = 0;
 		Voxel* voxel = m_voxels[v];
@@ -181,6 +226,13 @@ void Reconstructor::update()
 		{
 #pragma omp critical //push_back is critical
 			visible_voxels.push_back(voxel);
+
+			const int zp = (voxel->z - zL) / m_step;
+			const int yp = (voxel->y - yL) / m_step;
+			const int xp = (voxel->x - xL) / m_step;
+			if (zp * plane + yp * plane_x + xp < m_inforeground_voxels.size()) {
+				m_inforeground_voxels[zp * plane + yp * plane_x + xp] = true;
+			}
 		}
 	}
 

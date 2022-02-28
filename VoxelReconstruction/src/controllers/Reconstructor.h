@@ -30,6 +30,9 @@ public:
 		cv::Scalar color;                          // Color
 		std::vector<cv::Point> camera_projection;  // Projection location for camera[c]'s FoV (2D)
 		std::vector<int> valid_camera_projection;  // Flag if camera projection is in camera[c]'s FoV
+		int frontInd;
+		int leftInd;
+		int rightInd;
 	};
 
 private:
@@ -45,6 +48,8 @@ private:
 	std::vector<Voxel*> m_voxels;           // Pointer vector to all voxels in the half-space
 	std::vector<Voxel*> m_visible_voxels;   // Pointer vector to all visible voxels
 
+	std::vector<bool> m_inforeground_voxels;
+
 	void initialize();
 
 public:
@@ -57,6 +62,11 @@ public:
 	const std::vector<Voxel*>& getVisibleVoxels() const
 	{
 		return m_visible_voxels;
+	}
+
+	const std::vector<bool>& getForegroundVoxels() const
+	{
+		return m_inforeground_voxels;
 	}
 
 	const std::vector<Voxel*>& getVoxels() const
