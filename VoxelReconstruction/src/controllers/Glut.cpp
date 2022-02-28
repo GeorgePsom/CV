@@ -340,6 +340,11 @@ void Glut::keyboard(
 			reset();
 			arcball_reset();
 		}
+		else if (key == 'M' || key == 'm')
+		{
+			m_Glut->bMesh = m_Glut->bMesh ? false : true;
+		}
+
 	}
 	else if (key_i > 0 && key_i <= (int) scene3d.getCameras().size())
 	{
@@ -855,44 +860,63 @@ void Glut::drawVoxels()
 
 	// apply default translation
 	glTranslatef(0, 0, 0);
-	glScalef(75.0f, 75.0f, 75.0f);
-	//glPointSize(2.0f);
-	glBegin(/*GL_POINTS*/GL_TRIANGLES);
-	/*for (int z = 0; z < m_Glut->volData->getDepth(); z++)
+	if (m_Glut->bMesh)
 	{
-		for (int y = 0; y < m_Glut->volData->getHeight(); y++)
+		glScalef(32.0f, 32.0f, 32.0f);
+		glBegin(GL_TRIANGLES);
+	}
+	else
+	{
+		glPointSize(2.0f);
+		glBegin(GL_POINTS);
+	}
+	/*if (m_Glut->bMesh)
+	{
+		for (int z = 0; z < m_Glut->volData->getDepth(); z++)
 		{
-			for (int x = 0; x < m_Glut->volData->getWidth(); x++)
+			for (int y = 0; y < m_Glut->volData->getHeight(); y++)
 			{
-				m_Glut->volData->setVoxelAt(x, y, z, 0);
+				for (int x = 0; x < m_Glut->volData->getWidth(); x++)
+				{
+					m_Glut->volData->setVoxelAt(x, y, z, 0);
+				}
 			}
 		}
 	}*/
+	
 	PolyVox::SimpleVolume<uint8_t> volData(PolyVox::Region(PolyVox::Vector3DInt32(0, 0, 0), PolyVox::Vector3DInt32(127,127,127)));
 	vector<Reconstructor::Voxel*> voxels = m_Glut->getScene3d().getReconstructor().getVisibleVoxels();
 	for (size_t v = 0; v < voxels.size(); v++)
 	{
 		volData.setVoxelAt(voxels[v]->x/32, voxels[v]->y/32, voxels[v]->z/32, 255);
-		/*glColor4f(0.5f, 0.5f, 0.5f, 0.5f);
-		glVertex3f((GLfloat) voxels[v]->x, (GLfloat) voxels[v]->y, (GLfloat) voxels[v]->z);*/
+		if (!m_Glut->bMesh)
+		{
+			glColor4f(0.5f, 0.5f, 0.5f, 0.5f);
+			glVertex3f((GLfloat)voxels[v]->x, (GLfloat)voxels[v]->y, (GLfloat)voxels[v]->z);
+		}
+		
 		
 	}
-	PolyVox::SurfaceMesh<PolyVox::PositionMaterialNormal> mesh;
-	PolyVox::MarchingCubesSurfaceExtractor< PolyVox::SimpleVolume<uint8_t> > surfaceExtractor(&volData, volData.getEnclosingRegion(), &mesh);
-	surfaceExtractor.execute();
-
-
-
-
-	uint32_t nIndices  = mesh.getNoOfIndices();
-	
-	for (uint32_t i = 0; i < nIndices; i++)
+	if (m_Glut->bMesh)
 	{
-		glColor4f(0.5f, 0.5f, 0.5f, 0.5f);
-		glVertex3f((GLfloat)mesh.m_vecVertices[mesh.m_vecTriangleIndices[i]].position.getX(),
-			mesh.m_vecVertices[mesh.m_vecTriangleIndices[i]].position.getY(),
-			mesh.m_vecVertices[mesh.m_vecTriangleIndices[i]].position.getZ());
+		PolyVox::SurfaceMesh<PolyVox::PositionMaterialNormal> mesh;
+		PolyVox::MarchingCubesSurfaceExtractor< PolyVox::SimpleVolume<uint8_t> > surfaceExtractor(&volData, volData.getEnclosingRegion(), &mesh);
+		surfaceExtractor.execute();
+
+
+
+
+		uint32_t nIndices = mesh.getNoOfIndices();
+
+		for (uint32_t i = 0; i < nIndices; i++)
+		{
+			glColor4f(0.5f, 0.5f, 0.5f, 0.5f);
+			glVertex3f((GLfloat)mesh.m_vecVertices[mesh.m_vecTriangleIndices[i]].position.getX(),
+				mesh.m_vecVertices[mesh.m_vecTriangleIndices[i]].position.getY(),
+				mesh.m_vecVertices[mesh.m_vecTriangleIndices[i]].position.getZ());
+		}
 	}
+	
 	glEnd();
 	glPopMatrix();
 }

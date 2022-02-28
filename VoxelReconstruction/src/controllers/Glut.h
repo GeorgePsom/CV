@@ -36,6 +36,7 @@ class Glut
 	Scene3DRenderer &m_scene3d;
 	/*PolyVox::SurfaceMesh<PolyVox::PositionMaterialNormal> mesh;*/
 	PolyVox::SimpleVolume<uint8_t>* volData;
+	bool bMesh = false;
 
 	static Glut* m_Glut;
 
