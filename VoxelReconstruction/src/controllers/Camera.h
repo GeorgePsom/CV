@@ -33,6 +33,7 @@ class Camera
 	cv::Mat m_foreground_image;                      // This camera's foreground image (binary)
 
 	cv::VideoCapture m_video;                        // Video reader
+	cv::VideoCapture m_videoBack;                        // Background Video reader
 
 	cv::Size m_plane_size;                           // Camera's FoV size
 	long m_frame_amount;                             // Amount of frames in this camera's video
@@ -75,6 +76,8 @@ public:
 
 	static cv::Point projectOnView(const cv::Point3f &, const cv::Mat &, const cv::Mat &, const cv::Mat &, const cv::Mat &);
 	cv::Point projectOnView(const cv::Point3f &);
+
+	void Camera::averageBackground();
 
 	const std::string& getCamPropertiesFile() const
 	{

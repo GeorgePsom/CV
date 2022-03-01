@@ -57,23 +57,6 @@ Camera::~Camera()
 bool Camera::initialize()
 {
 	m_initialized = true;
-
-	/*vector<Mat> bg_video;
-	if (General::fexists(m_data_path + General::BackgroundVideoFile))
-	{
-		bg_video = imread(m_data_path + General::BackgroundVideoFile);
-		if (bg_video.empty())
-		{
-			cout << "Unable to read: " << m_data_path + General::BackgroundVideoFile;
-			return false;
-		}
-	}
-	else
-	{
-		cout << "Unable to find background video: " << m_data_path + General::BackgroundVideoFile;
-		return false;
-	}
-	assert(!bg_video.empty());*/
 	
 	Mat bg_image;
 	if (General::fexists(m_data_path + General::BackgroundImageFile))
@@ -116,6 +99,9 @@ bool Camera::initialize()
 	// Open the video for this camera
 	m_video = VideoCapture(m_data_path + General::VideoFile);
 	assert(m_video.isOpened());
+
+	m_videoBack = VideoCapture(m_data_path + General::BackgroundVideoFile);
+	assert(m_videoBack.isOpened());
 
 	// Assess the image size
 	m_plane_size.width = (int) m_video.get(CAP_PROP_FRAME_WIDTH);
@@ -165,10 +151,50 @@ bool Camera::initialize()
 		m_initialized = false;
 	}
 
+	averageBackground();
+
 	initCamLoc();
 	camPtInWorld();
 
 	return m_initialized;
+}
+
+void Camera::averageBackground()
+{
+	int frame_counter=0;
+	Mat curFrame;
+
+	m_videoBack.read(curFrame);
+
+	curFrame.convertTo(curFrame, CV_32F);
+
+	Mat accum = Mat::zeros(curFrame.size(), curFrame.type());
+	
+	while (true)
+	{
+
+		//imwrite("C:/CVProject - current/CV/VoxelReconstruction/data/accum.png", accum);
+		
+		accumulate(curFrame, accum);
+		
+		frame_counter++;
+
+		//m_video >> m_frame;
+
+		m_videoBack.read(curFrame);
+		curFrame.convertTo(curFrame, CV_32F);
+
+		if (curFrame.empty())
+		{
+			break;
+		}
+
+
+	}
+
+	accum = accum / (frame_counter);
+
+	imwrite(m_data_path+"background.png",accum);
 }
 
 /**
