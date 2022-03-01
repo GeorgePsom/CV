@@ -898,19 +898,7 @@ void Glut::drawVoxels()
 		glPointSize(5.0f);
 		glBegin(GL_POINTS);
 	}
-	/*if (m_Glut->bMesh)
-	{
-		for (int z = 0; z < m_Glut->volData->getDepth(); z++)
-		{
-			for (int y = 0; y < m_Glut->volData->getHeight(); y++)
-			{
-				for (int x = 0; x < m_Glut->volData->getWidth(); x++)
-				{
-					m_Glut->volData->setVoxelAt(x, y, z, 0);
-				}
-			}
-		}
-	}*/
+	
 	
 	PolyVox::SimpleVolume<uint8_t> volData(PolyVox::Region(PolyVox::Vector3DInt32(0, 0, 0), PolyVox::Vector3DInt32(127,127,127)));
 	
@@ -1139,31 +1127,6 @@ void Glut::drawInfo()
 #endif
 }
 
-void Glut::drawMesh()
-{
-	//glPushMatrix();
 
-	//// apply default translation
-	//
-	////glTranslatef(0, 0, 0);
-	////glScalef(5.0f, 5.0f, 5.0f);
-	//
-	//
-	//glBegin(GL_TRIANGLES);
-
-	//vector<Reconstructor::Voxel*> voxels = m_Glut->getScene3d().getReconstructor().getVisibleVoxels();
-	//uint32_t nIndices = m_Glut->mesh.getNoOfIndices();
-	//PolyVox::SurfaceMesh<PolyVox::PositionMaterialNormal> mesh = m_Glut->mesh;
-	//for (uint32_t i = 0; i < nIndices; i++)
-	//{
-	//	glColor4f(0.5f, 0.5f, 0.5f, 0.5f);
-	//	glVertex3f((GLfloat)mesh.m_vecVertices[mesh.m_vecTriangleIndices[i]].position.getX(),
-	//		mesh.m_vecVertices[mesh.m_vecTriangleIndices[i]].position.getY(),
-	//		mesh.m_vecVertices[mesh.m_vecTriangleIndices[i]].position.getZ());
-	//}
-
-	//glEnd();
-	//glPopMatrix();
-}
 
 } /* namespace nl_uu_science_gmt */

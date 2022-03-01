@@ -65,16 +65,6 @@ Scene3DRenderer::Scene3DRenderer(
 	m_current_frame = 0;
 	m_previous_frame = -1;
 
-	//const int H = 0;
-	//const int S = 0;
-	//const int V = 0;
-
-	//m_h_threshold = H;
-	//m_ph_threshold = H;
-	//m_s_threshold = S;
-	//m_ps_threshold = S;
-	//m_v_threshold = V;
-	//m_pv_threshold = V;
 
 	createFloorGrid();
 	setTopView();
@@ -144,7 +134,6 @@ void Scene3DRenderer::calcThresholds(
 	dilate(hsv_mask, hsv_mask_dilated, getStructuringElement(MORPH_ELLIPSE, Size(2, 2)), Point(-1, 1), 5);
 	vector<Mat> mask_channels;
 	split(hsv_mask_dilated, mask_channels);
-	//split(hsv_mask, mask_channels);  // Split the HSV-channels for further analysis
 
 
 	int max = 0;
@@ -179,7 +168,6 @@ void Scene3DRenderer::calcThresholds(
 		Mat tmp, foreground, background;
 		absdiff(channels[1], camera->getBgHsvChannels().at(1), tmp);
 		threshold(tmp, foreground, s, 255, CV_THRESH_BINARY);
-		//bitwise_or(foregroundV, foreground, foreground);
 		bitwise_xor(foreground, mask_channels[1], foreground);
 
 		Mat result = imgProcPipeline(hsv_image, foreground);
@@ -205,8 +193,7 @@ void Scene3DRenderer::calcThresholds(
 		Mat tmp, foreground, background;
 		absdiff(channels[0], camera->getBgHsvChannels().at(0), tmp);
 		threshold(tmp, foreground, h, 255, CV_THRESH_BINARY);
-		//bitwise_and(foreground, foregroundS, foreground);
-		//bitwise_or(foreground, foregroundV, foreground);
+		
 		bitwise_xor(foreground, mask_channels[0], foreground);
 
 		Mat result = imgProcPipeline(hsv_image, foreground);
@@ -234,7 +221,6 @@ Mat Scene3DRenderer::imgProcPipeline(Mat hsv_image, Mat foreground)
 
 	bitwise_and(foreground, greenMask, foreground);
 
-	//erode(foreground, foreground, getStructuringElement(MORPH_ELLIPSE, Size(4, 4)), Point(-1, 1));
 
 
 	vector<vector<Point> > contours;
@@ -318,10 +304,8 @@ Mat Scene3DRenderer::imgProcPipeline(Mat hsv_image, Mat foreground)
 	bitwise_not(greenMask, greenMask);
 	bitwise_and(foreground, greenMask, foreground);
 
-	//dilate(foreground, foreground, getStructuringElement(MORPH_ELLIPSE, Size(3, 3)), Point(-1, 1));
 
 	erode(foreground, foreground, getStructuringElement(MORPH_ELLIPSE, Size(2, 2)), Point(-1, 1));
-	//erode(foreground, foreground, getStructuringElement(MORPH_ELLIPSE, Size(2, 2)), Point(-1, 1));
 
 	return foreground;
 }
