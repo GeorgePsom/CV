@@ -119,6 +119,10 @@ bool Scene3DRenderer::processFrame()
 	return true;
 }
 
+void Scene3DRenderer::processBackground()
+{
+
+}
 
 
 void Scene3DRenderer::calcThresholds(
@@ -316,7 +320,8 @@ Mat Scene3DRenderer::imgProcPipeline(Mat hsv_image, Mat foreground)
 
 	//dilate(foreground, foreground, getStructuringElement(MORPH_ELLIPSE, Size(3, 3)), Point(-1, 1));
 
-	//erode(foreground, foreground, getStructuringElement(MORPH_RECT, Size(2, 2)), Point(-1, 1));
+	erode(foreground, foreground, getStructuringElement(MORPH_ELLIPSE, Size(2, 2)), Point(-1, 1));
+	//erode(foreground, foreground, getStructuringElement(MORPH_ELLIPSE, Size(2, 2)), Point(-1, 1));
 
 	return foreground;
 }

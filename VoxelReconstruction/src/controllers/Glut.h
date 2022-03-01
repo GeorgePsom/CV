@@ -36,7 +36,7 @@ class Glut
 	Scene3DRenderer &m_scene3d;
 	/*PolyVox::SurfaceMesh<PolyVox::PositionMaterialNormal> mesh;*/
 	PolyVox::SimpleVolume<uint8_t>* volData;
-	bool bMesh = false;
+	int dispState = 0; // 0 for voxels, 1 for colored voxels filled with black, 2 for all colored voxels, 3 for mesh
 
 	static Glut* m_Glut;
 

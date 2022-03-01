@@ -23,6 +23,7 @@ const string General::IntrinsicsFile       = "intrinsics.xml";
 const string General::CheckerboadCorners   = "boardcorners.xml";
 const string General::ConfigFile           = "config.xml";
 const string General::MaskFile			   = "mask.png";
+const string General::BackgroundVideoFile  = "background.avi";
 
 /**
  * Linux/Windows friendly way to check if a file exists

@@ -58,6 +58,23 @@ bool Camera::initialize()
 {
 	m_initialized = true;
 
+	/*vector<Mat> bg_video;
+	if (General::fexists(m_data_path + General::BackgroundVideoFile))
+	{
+		bg_video = imread(m_data_path + General::BackgroundVideoFile);
+		if (bg_video.empty())
+		{
+			cout << "Unable to read: " << m_data_path + General::BackgroundVideoFile;
+			return false;
+		}
+	}
+	else
+	{
+		cout << "Unable to find background video: " << m_data_path + General::BackgroundVideoFile;
+		return false;
+	}
+	assert(!bg_video.empty());*/
+	
 	Mat bg_image;
 	if (General::fexists(m_data_path + General::BackgroundImageFile))
 	{

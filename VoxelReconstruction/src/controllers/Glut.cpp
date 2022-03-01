@@ -342,7 +342,7 @@ void Glut::keyboard(
 		}
 		else if (key == 'M' || key == 'm')
 		{
-			m_Glut->bMesh = m_Glut->bMesh ? false : true;
+			m_Glut->dispState = (m_Glut->dispState+1)%4;
 		}
 
 	}
@@ -862,31 +862,33 @@ void Glut::drawVoxels()
 	const vector<Camera*>& cameras = m_Glut->getScene3d().getCameras();
 	vector<Mat> images;
 	vector<Point3f> c_locations;
-	float dist;
+	float minx = 1000.0f, maxx = 0, miny = 1000.0f, maxy = 0, dist;
+	Point3f center;
+	
+	if (m_Glut->dispState == 1 || m_Glut->dispState == 2) {
 
-	float minx = 1000.0f, maxx = 0, miny = 1000.0f, maxy = 0;
+		for (size_t v = 0; v < voxels.size(); v++)
+		{
+			if (voxels[v]->x < minx) minx = voxels[v]->x;
+			if (voxels[v]->x > maxx) maxx = voxels[v]->x;
+			if (voxels[v]->y < miny) miny = voxels[v]->y;
+			if (voxels[v]->y > maxy) maxy = voxels[v]->y;
+		}
 
-	for (size_t v = 0; v < voxels.size(); v++)
-	{
-		if (voxels[v]->x < minx) minx = voxels[v]->x;
-		if (voxels[v]->x > maxx) maxx = voxels[v]->x;
-		if (voxels[v]->y < miny) miny = voxels[v]->y;
-		if (voxels[v]->y > maxy) maxy = voxels[v]->y;
+		for (size_t v = 0; v < cameras.size(); v++)
+		{
+			images.push_back(cameras[v]->getVideoFrame(m_Glut->getScene3d().getCurrentFrame()));
+			c_locations.push_back(cameras[v]->getCameraLocation());
+		}
+
+		center = Point3f((maxx + minx) / 2, (maxy + miny) / 2, 0);
 	}
-
-	for (size_t v = 0; v < cameras.size(); v++)
-	{
-		images.push_back(cameras[v]->getVideoFrame(m_Glut->getScene3d().getCurrentFrame()));
-		c_locations.push_back(cameras[v]->getCameraLocation());
-	}
-
-	Point3f center((maxx + minx) / 2, (maxy + miny) / 2, 0);
 	
 	glPushMatrix();
 
 	// apply default translation
 	glTranslatef(0, 0, 0);
-	if (m_Glut->bMesh)
+	if (m_Glut->dispState==3)
 	{
 		glScalef(32.0f, 32.0f, 32.0f);
 		glBegin(GL_TRIANGLES);
@@ -914,117 +916,134 @@ void Glut::drawVoxels()
 	
 	for (size_t v = 0; v < voxels.size(); v++)
 	{
-		float distCam, distCent;
-		float col_x, col_y, col_z;
-		bool found = false;
+		if (m_Glut->dispState == 1 || m_Glut->dispState == 2) {
+			float distCam, distCent;
+			float col_x, col_y, col_z;
+			bool found = false;
 
-		vector<int> closer;
+			vector<int> closer;
 
-		for (int i = 0; i < cameras.size(); i++)
-		{
-
-			distCam = (int(c_locations[i].x) - voxels[v]->x) ^ 2 + (int(c_locations[i].y) - voxels[v]->y) ^ 2;
-
-			distCent = (int(center.x) - int(c_locations[i].x)) ^ 2 + (int(center.y) - int(c_locations[i].y)) ^ 2;
-
-			if (distCam <= distCent) {
-				closer.push_back(i);
-				found = true;
-			}
-		}
-
-		if (found == true)
-		{
-			float min = 10000.0f;
-			int ind;
-			boolean validFront = true;
-
-			for (int i = cameras.size() - 1; i >= 0; i--)
+			for (int i = 0; i < cameras.size(); i++)
 			{
+
 				distCam = (int(c_locations[i].x) - voxels[v]->x) ^ 2 + (int(c_locations[i].y) - voxels[v]->y) ^ 2;
 
-				if (distCam < min)
-				{
-					min = distCam;
-					ind = i;
+				distCent = (int(center.x) - int(c_locations[i].x)) ^ 2 + (int(center.y) - int(c_locations[i].y)) ^ 2;
+
+				if (distCam <= distCent) {
+					closer.push_back(i);
+					found = true;
 				}
 			}
 
-			if (voxelsForeground[voxels[v]->frontInd] == false)
+			if (found == true)
 			{
-				col_x = images[ind].at<Vec3b>(voxels[v]->camera_projection[ind].y, voxels[v]->camera_projection[ind].x)[0];
-				col_y = images[ind].at<Vec3b>(voxels[v]->camera_projection[ind].y, voxels[v]->camera_projection[ind].x)[1];
-				col_z = images[ind].at<Vec3b>(voxels[v]->camera_projection[ind].y, voxels[v]->camera_projection[ind].x)[2];
-
-				glColor4f(col_z / 255, col_y / 255, col_x / 255, 1.0f);
-			}
-			else if (voxelsForeground[voxels[v]->leftInd] == false)
-			{
-				col_x = images[ind].at<Vec3b>(voxels[v]->camera_projection[ind].y, voxels[v]->camera_projection[ind].x)[0];
-				col_y = images[ind].at<Vec3b>(voxels[v]->camera_projection[ind].y, voxels[v]->camera_projection[ind].x)[1];
-				col_z = images[ind].at<Vec3b>(voxels[v]->camera_projection[ind].y, voxels[v]->camera_projection[ind].x)[2];
-
-				glColor4f(col_z / 255, col_y / 255, col_x / 255, 1.0f);
-			}
-			else if (voxelsForeground[voxels[v]->rightInd] == false)
-			{
-				col_x = images[ind].at<Vec3b>(voxels[v]->camera_projection[ind].y, voxels[v]->camera_projection[ind].x)[0];
-				col_y = images[ind].at<Vec3b>(voxels[v]->camera_projection[ind].y, voxels[v]->camera_projection[ind].x)[1];
-				col_z = images[ind].at<Vec3b>(voxels[v]->camera_projection[ind].y, voxels[v]->camera_projection[ind].x)[2];
-
-				glColor4f(col_z / 255, col_y / 255, col_x / 255, 1.0f);
-			}
-			else {
-				/*float min = 10000.0f;
+				float min = 10000.0f;
 				int ind;
 				boolean validFront = true;
 
-				Reconstructor::Voxel* front;
-
-				while (true)
+				for (int i = closer.size() - 1; i >= 0; i--)
 				{
-					front = voxelsAll[voxels[v]->frontInd];
-
-					if (voxelsForeground[front->frontInd] == false)
-					{
-						break;
-					}
-				}
-
-				for (int i = cameras.size()-1; i >= 0; i--)
-				{
-					distCam = (int(c_locations[i].x) - front->x) ^ 2 + (int(c_locations[i].y) - front->y) ^ 2;
+					distCam = (int(c_locations[closer[i]].x) - voxels[v]->x) ^ 2 + (int(c_locations[closer[i]].y) - voxels[v]->y) ^ 2;
 
 					if (distCam < min)
 					{
 						min = distCam;
-						ind = i;
+						ind = closer[i];
+					}
+
+					if (closer[i] == 3)
+					{
+						ind = closer[i];
+						break;
 					}
 				}
 
-				col_x = images[ind].at<Vec3b>(front->camera_projection[ind].y, front->camera_projection[ind].x)[0];
-				col_y = images[ind].at<Vec3b>(front->camera_projection[ind].y, front->camera_projection[ind].x)[1];
-				col_z = images[ind].at<Vec3b>(front->camera_projection[ind].y, front->camera_projection[ind].x)[2];
+				if (voxelsForeground[voxels[v]->frontInd] == false)
+				{
+					col_x = images[ind].at<Vec3b>(voxels[v]->camera_projection[ind].y, voxels[v]->camera_projection[ind].x)[0];
+					col_y = images[ind].at<Vec3b>(voxels[v]->camera_projection[ind].y, voxels[v]->camera_projection[ind].x)[1];
+					col_z = images[ind].at<Vec3b>(voxels[v]->camera_projection[ind].y, voxels[v]->camera_projection[ind].x)[2];
 
-				glColor4f(col_z / 255, col_y / 255, col_x / 255, 0.5f);*/
+					glColor4f(col_z / 255, col_y / 255, col_x / 255, 1.0f);
+				}
+				else if (voxelsForeground[voxels[v]->leftInd] == false)
+				{
+					col_x = images[ind].at<Vec3b>(voxels[v]->camera_projection[ind].y, voxels[v]->camera_projection[ind].x)[0];
+					col_y = images[ind].at<Vec3b>(voxels[v]->camera_projection[ind].y, voxels[v]->camera_projection[ind].x)[1];
+					col_z = images[ind].at<Vec3b>(voxels[v]->camera_projection[ind].y, voxels[v]->camera_projection[ind].x)[2];
 
-				glColor4f(0.0f, 0.0f, 0.0f, 1.0f);
+					glColor4f(col_z / 255, col_y / 255, col_x / 255, 1.0f);
+				}
+				else if (voxelsForeground[voxels[v]->rightInd] == false)
+				{
+					col_x = images[ind].at<Vec3b>(voxels[v]->camera_projection[ind].y, voxels[v]->camera_projection[ind].x)[0];
+					col_y = images[ind].at<Vec3b>(voxels[v]->camera_projection[ind].y, voxels[v]->camera_projection[ind].x)[1];
+					col_z = images[ind].at<Vec3b>(voxels[v]->camera_projection[ind].y, voxels[v]->camera_projection[ind].x)[2];
+
+					glColor4f(col_z / 255, col_y / 255, col_x / 255, 1.0f);
+				}
+				else {
+					if (m_Glut->dispState == 2) {
+						float min = 10000.0f;
+						int ind;
+						boolean validFront = true;
+
+						Reconstructor::Voxel* front;
+
+						while (true)
+						{
+							front = voxelsAll[voxels[v]->frontInd];
+
+							if (voxelsForeground[front->frontInd] == false)
+							{
+								break;
+							}
+						}
+
+						for (int i = closer.size() - 1; i >= 0; i--)
+						{
+							distCam = (int(c_locations[closer[i]].x) - front->x) ^ 2 + (int(c_locations[closer[i]].y) - front->y) ^ 2;
+
+							if (distCam < min)
+							{
+								min = distCam;
+								ind = closer[i];
+							}
+
+							if (closer[i] == 3)
+							{
+								ind = closer[i];
+								break;
+							}
+						}
+
+						col_x = images[ind].at<Vec3b>(front->camera_projection[ind].y, front->camera_projection[ind].x)[0];
+						col_y = images[ind].at<Vec3b>(front->camera_projection[ind].y, front->camera_projection[ind].x)[1];
+						col_z = images[ind].at<Vec3b>(front->camera_projection[ind].y, front->camera_projection[ind].x)[2];
+
+						glColor4f(col_z / 255, col_y / 255, col_x / 255, 0.5f);
+					}
+					else
+					{
+						glColor4f(0.0f, 0.0f, 0.0f, 1.0f);
+					}
+				}
+
 			}
-
-
-		}
-		else
-		{
-			col_x = images[0].at<Vec3b>(voxels[v]->camera_projection[0].y, voxels[v]->camera_projection[0].x)[0];
-			col_y = images[0].at<Vec3b>(voxels[v]->camera_projection[0].y, voxels[v]->camera_projection[0].x)[1];
-			col_z = images[0].at<Vec3b>(voxels[v]->camera_projection[0].y, voxels[v]->camera_projection[0].x)[2];
+			else
+			{
+				col_x = images[0].at<Vec3b>(voxels[v]->camera_projection[0].y, voxels[v]->camera_projection[0].x)[0];
+				col_y = images[0].at<Vec3b>(voxels[v]->camera_projection[0].y, voxels[v]->camera_projection[0].x)[1];
+				col_z = images[0].at<Vec3b>(voxels[v]->camera_projection[0].y, voxels[v]->camera_projection[0].x)[2];
+			}
 		}
 		
 		volData.setVoxelAt(voxels[v]->x/32, voxels[v]->y/32, voxels[v]->z/32, 255);
 		
-		if (!m_Glut->bMesh)
+		if (m_Glut->dispState != 3)
 		{
-			//glColor4f(0.5f, 0.5f, 0.5f, 0.5f);
+			if (m_Glut->dispState == 0) glColor4f(0.5f, 0.5f, 0.5f, 0.5f);
 			glVertex3f((GLfloat)voxels[v]->x, (GLfloat)voxels[v]->y, (GLfloat)voxels[v]->z);
 		}
 		
@@ -1032,7 +1051,7 @@ void Glut::drawVoxels()
 	}
 	
 	
-	if (m_Glut->bMesh)
+	if (m_Glut->dispState == 3)
 	{
 		PolyVox::SurfaceMesh<PolyVox::PositionMaterialNormal> mesh;
 		PolyVox::MarchingCubesSurfaceExtractor< PolyVox::SimpleVolume<uint8_t> > surfaceExtractor(&volData, volData.getEnclosingRegion(), &mesh);
