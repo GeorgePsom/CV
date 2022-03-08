@@ -1027,7 +1027,7 @@ void Glut::drawVoxels()
 			}
 		}
 		
-		volData.setVoxelAt(voxels[v]->x/32, voxels[v]->y/32, voxels[v]->z/32, 255);
+		//volData.setVoxelAt(voxels[v]->x/32, voxels[v]->y/32, voxels[v]->z/32, 255);
 		
 		if (m_Glut->dispState != 3)
 		{

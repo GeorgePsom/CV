@@ -221,10 +221,15 @@ Mat Scene3DRenderer::imgProcPipeline(Mat hsv_image, Mat foreground)
 
 	bitwise_and(foreground, greenMask, foreground);
 
+	erode(foreground, foreground, getStructuringElement(MORPH_ELLIPSE, Size(2, 2)), Point(-1, 1));
 
+	dilate(foreground, foreground, getStructuringElement(MORPH_ELLIPSE, Size(4, 4)), Point(-1, 1));
+	dilate(foreground, foreground, getStructuringElement(MORPH_ELLIPSE, Size(4, 4)), Point(-1, 1));
 
 	vector<vector<Point> > contours;
 	vector<Vec4i> hierarchy;
+
+	int contourThres = 100;
 
 	findContours(foreground, contours, hierarchy,
 		RETR_CCOMP, CHAIN_APPROX_SIMPLE);
@@ -236,14 +241,18 @@ Mat Scene3DRenderer::imgProcPipeline(Mat hsv_image, Mat foreground)
 
 		for (idx = 0; idx < contours.size(); idx++)
 		{
-			if (contours[idx].size() > maxSize)
+			/*if (contours[idx].size() > maxSize)
 			{
 				maxSize = contours[idx].size();
 				maxInd = idx;
-			}
-		}
+			}*/
 
-		drawContours(foreground, contours, maxInd, 255, FILLED);
+			if (contours[idx].size() > contourThres)
+			{
+				drawContours(foreground, contours, idx, 255, FILLED);
+			}
+
+		}
 
 	}
 
@@ -260,23 +269,20 @@ Mat Scene3DRenderer::imgProcPipeline(Mat hsv_image, Mat foreground)
 
 		for (idx = 0; idx < contoursNew.size(); idx++)
 		{
-			if (contoursNew[idx].size() > maxSize)
-			{
-				maxSize = contoursNew[idx].size();
-				maxInd = idx;
-			}
-		}
 
-		for (idx = 0; idx < contoursNew.size(); idx++)
-		{
-			if (idx != maxInd /* && contours[idx].size()<10*/)
+			if (contoursNew[idx].size() > contourThres)
+			{
+				drawContours(foreground, contoursNew, idx, 255, FILLED);
+			}
+			else
 			{
 				drawContours(foreground, contoursNew, idx, 0, FILLED);
 			}
-		}
 
-		drawContours(foreground, contoursNew, maxInd, 255, FILLED);
+		}
 	}
+
+	contoursNew.clear();
 
 	dilate(foreground, foreground, getStructuringElement(MORPH_ELLIPSE, Size(4, 4)), Point(-1, 1));
 
@@ -290,14 +296,12 @@ Mat Scene3DRenderer::imgProcPipeline(Mat hsv_image, Mat foreground)
 
 		for (idx = 0; idx < contoursNew.size(); idx++)
 		{
-			if (contoursNew[idx].size() > maxSize)
+
+			if (contoursNew[idx].size() > contourThres)
 			{
-				maxSize = contoursNew[idx].size();
-				maxInd = idx;
+				drawContours(foreground, contoursNew, idx, 255, FILLED);
 			}
 		}
-
-		drawContours(foreground, contoursNew, maxInd, 255, FILLED);
 	}
 
 	inRange(hsv_image, Scalar(55, 100, 80), Scalar(85, 255, 200), greenMask);

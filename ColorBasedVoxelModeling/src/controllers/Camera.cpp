@@ -83,6 +83,15 @@ bool Camera::initialize()
 			cout << "Unable to read: " << m_data_path + General::MaskFile;
 			return false;
 		}
+
+		/*Mat temp = mask;
+		
+		inRange(mask, cv::Scalar(254, 254, 254), cv::Scalar(255, 255, 255), temp);
+
+		mask = temp;
+
+
+		imwrite(m_data_path+"mask2.png", mask);*/
 	}
 	else
 	{
