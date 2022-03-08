@@ -69,7 +69,7 @@ Scene3DRenderer::Scene3DRenderer(
 	createFloorGrid();
 	setTopView();
 
-	calcThresholds(m_cameras[0]);
+	calcThresholds(m_cameras[1]);
 
 	createTrackbar("Frame", VIDEO_WINDOW, &m_current_frame, m_number_of_frames - 2);
 	createTrackbar("H", VIDEO_WINDOW, &m_h_threshold, 255);
