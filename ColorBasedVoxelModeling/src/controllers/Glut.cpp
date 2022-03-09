@@ -862,8 +862,10 @@ void Glut::drawVoxels()
 	const vector<Camera*>& cameras = m_Glut->getScene3d().getCameras();
 	vector<Mat> images;
 	vector<Point3f> c_locations;
-	float minx = 1000.0f, maxx = 0, miny = 1000.0f, maxy = 0, dist;
-	Point3f center;
+	vector<Point3f> colorsAvg;
+	vector<int> colorsCount;
+	//float minx = 1000.0f, maxx = 0, miny = 1000.0f, maxy = 0, dist;
+	//Point3f center;
 
 	Point3f* colors = new Point3f[4];
 	colors[0] = Point3f(255.0f, 0.0f, 0.0f);
@@ -873,26 +875,33 @@ void Glut::drawVoxels()
 
 
 	std::vector<Point2f> projectedVoxels;
+	std::vector<Point2f> clusterCenters(4);
 	for (size_t v = 0; v < voxels.size(); v++)
 	{
 		projectedVoxels.push_back(Point2f(voxels[v]->x, voxels[v]->y));
 	}
 	std::vector<int> clusterIndices(voxels.size());
 	double accuracy = kmeans(projectedVoxels, 4, clusterIndices,
-		TermCriteria(TermCriteria::EPS + TermCriteria::COUNT, 10, 1.0), 10, KMEANS_RANDOM_CENTERS);
+		TermCriteria(TermCriteria::EPS + TermCriteria::COUNT, 10, 1.0), 10, KMEANS_RANDOM_CENTERS, clusterCenters);
+
+	for (int i = 0; i < clusterCenters.size(); i++)
+	{
+		colorsAvg.push_back(Point3f(0,0,0));
+		colorsCount.push_back(0);
+	}
 
 
 
 	
-	if (m_Glut->dispState == 1 || m_Glut->dispState == 2) {
+	if (m_Glut->dispState == 1 || m_Glut->dispState == 2 || true) {
 
-		for (size_t v = 0; v < voxels.size(); v++)
+		/*for (size_t v = 0; v < voxels.size(); v++)
 		{
 			if (voxels[v]->x < minx) minx = voxels[v]->x;
 			if (voxels[v]->x > maxx) maxx = voxels[v]->x;
 			if (voxels[v]->y < miny) miny = voxels[v]->y;
 			if (voxels[v]->y > maxy) maxy = voxels[v]->y;
-		}
+		}*/
 
 		for (size_t v = 0; v < cameras.size(); v++)
 		{
@@ -900,7 +909,7 @@ void Glut::drawVoxels()
 			c_locations.push_back(cameras[v]->getCameraLocation());
 		}
 
-		center = Point3f((maxx + minx) / 2, (maxy + miny) / 2, 0);
+		//center = Point3f((maxx + minx) / 2, (maxy + miny) / 2, 0);
 	}
 	
 	glPushMatrix();
@@ -923,7 +932,7 @@ void Glut::drawVoxels()
 	
 	for (size_t v = 0; v < voxels.size(); v++)
 	{
-		if (m_Glut->dispState == 1 || m_Glut->dispState == 2) {
+		if (m_Glut->dispState == 1 || m_Glut->dispState == 2 || true) {
 			float distCam, distCent;
 			float col_x, col_y, col_z;
 			bool found = false;
@@ -935,7 +944,7 @@ void Glut::drawVoxels()
 
 				distCam = (int(c_locations[i].x) - voxels[v]->x) ^ 2 + (int(c_locations[i].y) - voxels[v]->y) ^ 2;
 
-				distCent = (int(center.x) - int(c_locations[i].x)) ^ 2 + (int(center.y) - int(c_locations[i].y)) ^ 2;
+				distCent = (int(clusterCenters[i].x) - int(c_locations[i].x)) ^ 2 + (int(clusterCenters[i].y) - int(c_locations[i].y)) ^ 2;
 
 				if (distCam <= distCent) {
 					closer.push_back(i);
@@ -966,15 +975,20 @@ void Glut::drawVoxels()
 					}
 				}
 
-				if (voxelsForeground[voxels[v]->frontInd] == false)
+				if (voxelsForeground[voxels[v]->frontInd] == false || voxelsForeground[voxels[v]->leftInd] == false || voxelsForeground[voxels[v]->rightInd] == false)
 				{
 					col_x = images[ind].at<Vec3b>(voxels[v]->camera_projection[ind].y, voxels[v]->camera_projection[ind].x)[0];
 					col_y = images[ind].at<Vec3b>(voxels[v]->camera_projection[ind].y, voxels[v]->camera_projection[ind].x)[1];
 					col_z = images[ind].at<Vec3b>(voxels[v]->camera_projection[ind].y, voxels[v]->camera_projection[ind].x)[2];
 
-					glColor4f(col_z / 255, col_y / 255, col_x / 255, 1.0f);
+					colorsAvg[clusterIndices[v]].x += col_x;
+					colorsAvg[clusterIndices[v]].y += col_y;
+					colorsAvg[clusterIndices[v]].z += col_z;
+					colorsCount[clusterIndices[v]]++;
+
+					//glColor4f(col_z / 255, col_y / 255, col_x / 255, 1.0f);
 				}
-				else if (voxelsForeground[voxels[v]->leftInd] == false)
+				/*else if (voxelsForeground[voxels[v]->leftInd] == false)
 				{
 					col_x = images[ind].at<Vec3b>(voxels[v]->camera_projection[ind].y, voxels[v]->camera_projection[ind].x)[0];
 					col_y = images[ind].at<Vec3b>(voxels[v]->camera_projection[ind].y, voxels[v]->camera_projection[ind].x)[1];
@@ -1035,7 +1049,7 @@ void Glut::drawVoxels()
 					{
 						glColor4f(0.0f, 0.0f, 0.0f, 1.0f);
 					}
-				}
+				}*/
 
 			}
 			else
@@ -1048,14 +1062,26 @@ void Glut::drawVoxels()
 		
 		//volData.setVoxelAt(voxels[v]->x/32, voxels[v]->y/32, voxels[v]->z/32, 255);
 		
+		
+	}
+
+	for (int i = 0; i < clusterCenters.size(); i++)
+	{
+		colorsAvg[i].x = colorsAvg[i].x / colorsCount[i];
+		colorsAvg[i].y = colorsAvg[i].y / colorsCount[i];
+		colorsAvg[i].z = colorsAvg[i].z / colorsCount[i];
+
+		std::cout << "Cluster" << i << ": " << colorsAvg[i] << std::endl;
+	}
+
+	for (size_t v = 0; v < voxels.size(); v++)
+	{
 		if (m_Glut->dispState != 3)
 		{
-			Point3f col = colors[clusterIndices[v]];
+			Point3f col = colorsAvg[clusterIndices[v]];
 			if (m_Glut->dispState == 0) glColor4f(col.x, col.y, col.z, 0.5f);
 			glVertex3f((GLfloat)voxels[v]->x, (GLfloat)voxels[v]->y, (GLfloat)voxels[v]->z);
 		}
-		
-		
 	}
 	
 	
