@@ -864,8 +864,7 @@ void Glut::drawVoxels()
 	vector<Point3f> c_locations;
 	vector<Point3f> colorsAvg;
 	vector<int> colorsCount;
-	//float minx = 1000.0f, maxx = 0, miny = 1000.0f, maxy = 0, dist;
-	//Point3f center;
+	vector<Mat> backgroundImages;
 
 	Point3f* colors = new Point3f[4];
 	colors[0] = Point3f(255.0f, 0.0f, 0.0f);
@@ -895,21 +894,12 @@ void Glut::drawVoxels()
 	
 	if (m_Glut->dispState == 1 || m_Glut->dispState == 2 || true) {
 
-		/*for (size_t v = 0; v < voxels.size(); v++)
-		{
-			if (voxels[v]->x < minx) minx = voxels[v]->x;
-			if (voxels[v]->x > maxx) maxx = voxels[v]->x;
-			if (voxels[v]->y < miny) miny = voxels[v]->y;
-			if (voxels[v]->y > maxy) maxy = voxels[v]->y;
-		}*/
-
 		for (size_t v = 0; v < cameras.size(); v++)
 		{
 			images.push_back(cameras[v]->getVideoFrame(m_Glut->getScene3d().getCurrentFrame()));
 			c_locations.push_back(cameras[v]->getCameraLocation());
+			backgroundImages.push_back(cameras[v]->getBackgroundImage());
 		}
-
-		//center = Point3f((maxx + minx) / 2, (maxy + miny) / 2, 0);
 	}
 	
 	glPushMatrix();
@@ -934,7 +924,7 @@ void Glut::drawVoxels()
 	{
 		if (m_Glut->dispState == 1 || m_Glut->dispState == 2 || true) {
 			float distCam, distCent;
-			float col_x, col_y, col_z;
+			float col_x, col_y, col_z, back_x, back_y, back_z;
 			bool found = false;
 
 			vector<int> closer;
@@ -967,105 +957,35 @@ void Glut::drawVoxels()
 						min = distCam;
 						ind = closer[i];
 					}
-
-					if (closer[i] == 3)
-					{
-						ind = closer[i];
-						break;
-					}
 				}
 
-				if ((voxelsForeground[voxels[v]->frontInd] == false || voxelsForeground[voxels[v]->leftInd] == false || voxelsForeground[voxels[v]->rightInd] == false )
-					&& voxels[v]->z > 1024)
+				if ((voxelsForeground[voxels[v]->frontInd] == false || voxelsForeground[voxels[v]->leftInd] == false || voxelsForeground[voxels[v]->rightInd] == false)
+					&& voxels[v]->z > 100)
 				{
 					col_x = images[ind].at<Vec3b>(voxels[v]->camera_projection[ind].y, voxels[v]->camera_projection[ind].x)[0];
 					col_y = images[ind].at<Vec3b>(voxels[v]->camera_projection[ind].y, voxels[v]->camera_projection[ind].x)[1];
 					col_z = images[ind].at<Vec3b>(voxels[v]->camera_projection[ind].y, voxels[v]->camera_projection[ind].x)[2];
 
-					colorsAvg[clusterIndices[v]].x += col_x;
-					colorsAvg[clusterIndices[v]].y += col_y;
-					colorsAvg[clusterIndices[v]].z += col_z;
-					colorsCount[clusterIndices[v]]++;
+					// find background pixel color
+					back_x = backgroundImages[ind].at<Vec3b>(voxels[v]->camera_projection[ind].y, voxels[v]->camera_projection[ind].x)[0];
+					back_y = backgroundImages[ind].at<Vec3b>(voxels[v]->camera_projection[ind].y, voxels[v]->camera_projection[ind].x)[1];
+					back_z = backgroundImages[ind].at<Vec3b>(voxels[v]->camera_projection[ind].y, voxels[v]->camera_projection[ind].x)[2];
 
-					//glColor4f(col_z / 255, col_y / 255, col_x / 255, 1.0f);
-				}
-				/*else if (voxelsForeground[voxels[v]->leftInd] == false)
-				{
-					col_x = images[ind].at<Vec3b>(voxels[v]->camera_projection[ind].y, voxels[v]->camera_projection[ind].x)[0];
-					col_y = images[ind].at<Vec3b>(voxels[v]->camera_projection[ind].y, voxels[v]->camera_projection[ind].x)[1];
-					col_z = images[ind].at<Vec3b>(voxels[v]->camera_projection[ind].y, voxels[v]->camera_projection[ind].x)[2];
+					int colDist = 50;
 
-					glColor4f(col_z / 255, col_y / 255, col_x / 255, 1.0f);
-				}
-				else if (voxelsForeground[voxels[v]->rightInd] == false)
-				{
-					col_x = images[ind].at<Vec3b>(voxels[v]->camera_projection[ind].y, voxels[v]->camera_projection[ind].x)[0];
-					col_y = images[ind].at<Vec3b>(voxels[v]->camera_projection[ind].y, voxels[v]->camera_projection[ind].x)[1];
-					col_z = images[ind].at<Vec3b>(voxels[v]->camera_projection[ind].y, voxels[v]->camera_projection[ind].x)[2];
-
-					glColor4f(col_z / 255, col_y / 255, col_x / 255, 1.0f);
-				}
-				else {
-					if (m_Glut->dispState == 2) {
-						float min = 10000.0f;
-						int ind;
-						boolean validFront = true;
-
-						Reconstructor::Voxel* front;
-
-						while (true)
-						{
-							front = voxelsAll[voxels[v]->frontInd];
-
-							if (voxelsForeground[front->frontInd] == false)
-							{
-								break;
-							}
-						}
-
-						for (int i = closer.size() - 1; i >= 0; i--)
-						{
-							distCam = (int(c_locations[closer[i]].x) - front->x) ^ 2 + (int(c_locations[closer[i]].y) - front->y) ^ 2;
-
-							if (distCam < min)
-							{
-								min = distCam;
-								ind = closer[i];
-							}
-
-							if (closer[i] == 3)
-							{
-								ind = closer[i];
-								break;
-							}
-						}
-
-						col_x = images[ind].at<Vec3b>(front->camera_projection[ind].y, front->camera_projection[ind].x)[0];
-						col_y = images[ind].at<Vec3b>(front->camera_projection[ind].y, front->camera_projection[ind].x)[1];
-						col_z = images[ind].at<Vec3b>(front->camera_projection[ind].y, front->camera_projection[ind].x)[2];
-
-						glColor4f(col_z / 255, col_y / 255, col_x / 255, 0.5f);
+					// if difference with background
+					if (abs(col_x - back_x) > colDist || abs(col_y - back_y) > colDist || abs(col_z - back_z) > colDist) {
+						colorsAvg[clusterIndices[v]].x += col_x;
+						colorsAvg[clusterIndices[v]].y += col_y;
+						colorsAvg[clusterIndices[v]].z += col_z;
+						colorsCount[clusterIndices[v]]++;
 					}
-					else
-					{
-						glColor4f(0.0f, 0.0f, 0.0f, 1.0f);
-					}
-				}*/
-
-			}
-			else
-			{
-				col_x = images[0].at<Vec3b>(voxels[v]->camera_projection[0].y, voxels[v]->camera_projection[0].x)[0];
-				col_y = images[0].at<Vec3b>(voxels[v]->camera_projection[0].y, voxels[v]->camera_projection[0].x)[1];
-				col_z = images[0].at<Vec3b>(voxels[v]->camera_projection[0].y, voxels[v]->camera_projection[0].x)[2];
+				}
 			}
 		}
-		
-		//volData.setVoxelAt(voxels[v]->x/32, voxels[v]->y/32, voxels[v]->z/32, 255);
-		
-		
 	}
 
+	// calculate mean
 	for (int i = 0; i < clusterCenters.size(); i++)
 	{
 		colorsAvg[i].x = colorsAvg[i].x / colorsCount[i];
@@ -1074,15 +994,29 @@ void Glut::drawVoxels()
 
 		std::cout << "Cluster" << i << ": " << colorsAvg[i] << std::endl;
 		std::cout << "ClusterCount" << i << ": " << colorsCount[i] << std::endl;
-
 	}
 
+	// set the ground truth for the first frame
+	if (m_Glut->getScene3d().getCurrentFrame() == 1)
+	{
+		m_Glut->getScene3d().updateColorModel(colorsAvg);
+	}
+
+	std::vector<int> inds = matchColorInds(colorsAvg,clusterCenters.size());
+
+	
 	for (size_t v = 0; v < voxels.size(); v++)
 	{
 		if (m_Glut->dispState != 3)
 		{
 			Point3f col = colorsAvg[clusterIndices[v]];
-			if (m_Glut->dispState == 0) glColor4f(col.x/255.0f, col.y/255.0f, col.z/255.0f, 0.5f);
+			//if (m_Glut->dispState == 0) glColor4f(col.x/255.0f, col.y/255.0f, col.z/255.0f, 1.0f);
+			
+			if(inds[clusterIndices[v]]==0) glColor4f(0.0f, 0.0f, 1.0f, 1.0f);
+			else if (inds[clusterIndices[v]] == 1) glColor4f(1.0f, 0.0f, 1.0f, 1.0f);
+			else if (inds[clusterIndices[v]] == 2) glColor4f(0.0f, 1.0f, 1.0f, 1.0f);
+			else if (inds[clusterIndices[v]] == 3) glColor4f(1.0f, 1.0f, 0.0f, 1.0f);
+
 			glVertex3f((GLfloat)voxels[v]->x, (GLfloat)voxels[v]->y, (GLfloat)voxels[v]->z);
 		}
 	}
@@ -1110,6 +1044,42 @@ void Glut::drawVoxels()
 	
 	glEnd();
 	glPopMatrix();
+}
+
+std::vector<int> Glut::matchColorInds(vector<Point3f> colorsAvg, int clustSize)
+{
+	std::vector<Point3f> ground = m_Glut->getScene3d().getColorModel();
+	std::vector<std::vector<int>> scores(clustSize, std::vector<int>(clustSize, 0));
+	std::vector<int> inds = std::vector<int>(clustSize,0);
+
+	for (int i = 0; i < clustSize; i++)
+	{
+		int minDist = 1000000;
+
+		for (int j = 0; j < clustSize; j++)
+		{
+			//euclidean distance
+			scores[i][j] = int(((colorsAvg[i].x - ground[j].x)) * ((colorsAvg[i].x - ground[j].x)))
+				+ int(((colorsAvg[i].y - ground[j].y)) * ((colorsAvg[i].y - ground[j].y)))
+				+ int(((colorsAvg[i].z - ground[j].z)) * ((colorsAvg[i].z - ground[j].z)));
+
+			if (scores[i][j] < minDist)
+			{
+				bool found = false;
+				for (int k = 0; k < i; k++)
+				{
+					if (j == inds[k]) found = true;
+				}
+
+				if (found == false) {
+					minDist = scores[i][j];
+					inds[i] = j;
+				}
+			}
+		}
+	}
+
+	return inds;
 }
 
 /**

@@ -75,6 +75,8 @@ bool Camera::initialize()
 	}
 	assert(!bg_image.empty());
 
+	m_bg_rgb = bg_image;
+
 	if (General::fexists(m_data_path + General::MaskFile))
 	{
 		mask = imread(m_data_path + General::MaskFile);

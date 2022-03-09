@@ -30,6 +30,7 @@ class Camera
 	const int m_id;                                 // Camera ID
 
 	std::vector<cv::Mat> m_bg_hsv_channels;          // Background HSV channel images
+	cv::Mat m_bg_rgb;								 // Background in RGB
 	cv::Mat m_foreground_image;                      // This camera's foreground image (binary)
 
 	cv::VideoCapture m_video;                        // Video reader
@@ -127,6 +128,11 @@ public:
 	const cv::Mat& getForegroundImage() const
 	{
 		return m_foreground_image;
+	}
+
+	const cv::Mat& getBackgroundImage() const
+	{
+		return m_bg_rgb;
 	}
 
 	void setForegroundImage(const cv::Mat& foregroundImage)

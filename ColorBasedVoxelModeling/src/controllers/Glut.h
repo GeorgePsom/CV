@@ -25,6 +25,9 @@
 #include "PolyVoxCore/MarchingCubesSurfaceExtractor.h"
 #include "PolyVoxCore/SurfaceMesh.h"
 #include "PolyVoxCore/SimpleVolume.h"
+#include <opencv2/core/core.hpp>
+#include <opencv2/core/operations.hpp>
+#include <vector>
 
 namespace nl_uu_science_gmt
 {
@@ -48,6 +51,8 @@ class Glut
 	static void drawWCoord();
 	static void drawInfo();
 	static void drawMesh();
+
+	static std::vector<int> matchColorInds(std::vector<cv::Point3f> colorsAvg, int clustSize);
 
 	static inline void perspectiveGL(
 			GLdouble, GLdouble, GLdouble, GLdouble);

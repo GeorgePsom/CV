@@ -109,11 +109,6 @@ bool Scene3DRenderer::processFrame()
 	return true;
 }
 
-void Scene3DRenderer::processBackground()
-{
-
-}
-
 
 void Scene3DRenderer::calcThresholds(
 	Camera* camera)
