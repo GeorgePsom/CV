@@ -975,7 +975,8 @@ void Glut::drawVoxels()
 					}
 				}
 
-				if (voxelsForeground[voxels[v]->frontInd] == false || voxelsForeground[voxels[v]->leftInd] == false || voxelsForeground[voxels[v]->rightInd] == false)
+				if ((voxelsForeground[voxels[v]->frontInd] == false || voxelsForeground[voxels[v]->leftInd] == false || voxelsForeground[voxels[v]->rightInd] == false )
+					&& voxels[v]->z > 1024)
 				{
 					col_x = images[ind].at<Vec3b>(voxels[v]->camera_projection[ind].y, voxels[v]->camera_projection[ind].x)[0];
 					col_y = images[ind].at<Vec3b>(voxels[v]->camera_projection[ind].y, voxels[v]->camera_projection[ind].x)[1];
@@ -1072,6 +1073,8 @@ void Glut::drawVoxels()
 		colorsAvg[i].z = colorsAvg[i].z / colorsCount[i];
 
 		std::cout << "Cluster" << i << ": " << colorsAvg[i] << std::endl;
+		std::cout << "ClusterCount" << i << ": " << colorsCount[i] << std::endl;
+
 	}
 
 	for (size_t v = 0; v < voxels.size(); v++)
@@ -1079,7 +1082,7 @@ void Glut::drawVoxels()
 		if (m_Glut->dispState != 3)
 		{
 			Point3f col = colorsAvg[clusterIndices[v]];
-			if (m_Glut->dispState == 0) glColor4f(col.x, col.y, col.z, 0.5f);
+			if (m_Glut->dispState == 0) glColor4f(col.x/255.0f, col.y/255.0f, col.z/255.0f, 0.5f);
 			glVertex3f((GLfloat)voxels[v]->x, (GLfloat)voxels[v]->y, (GLfloat)voxels[v]->z);
 		}
 	}
