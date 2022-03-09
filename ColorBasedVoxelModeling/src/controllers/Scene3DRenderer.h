@@ -70,7 +70,7 @@ class Scene3DRenderer
 	int m_v_threshold;                        // Value threshold number for background subtraction
 	int m_pv_threshold;                       // Value threshold value at previous iteration (update awareness)
 
-	std::vector<cv::Point3f> colorModel;
+	std::vector<std::vector<cv::Point3f>> colorModel;
 
 
 	// edge points of the virtual ground floor grid
@@ -121,12 +121,12 @@ public:
 		return m_current_camera;
 	}
 
-	std::vector<cv::Point3f> getColorModel() const
+	std::vector<std::vector<cv::Point3f>> getColorModel() const
 	{
 		return colorModel;
 	}
 
-	void updateColorModel(std::vector<cv::Point3f> colorMod)
+	void updateColorModel(std::vector<std::vector<cv::Point3f>> colorMod)
 	{
 		colorModel.clear();
 
