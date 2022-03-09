@@ -864,6 +864,25 @@ void Glut::drawVoxels()
 	vector<Point3f> c_locations;
 	float minx = 1000.0f, maxx = 0, miny = 1000.0f, maxy = 0, dist;
 	Point3f center;
+
+	Point3f* colors = new Point3f[4];
+	colors[0] = Point3f(255.0f, 0.0f, 0.0f);
+	colors[1] = Point3f(0.0f, 255.0f, 0.0f);
+	colors[2] = Point3f(0.0f, 0.0f, 255.0f);
+	colors[3] = Point3f(255.0f, 255.0f, 0.0f);
+
+
+	std::vector<Point2f> projectedVoxels;
+	for (size_t v = 0; v < voxels.size(); v++)
+	{
+		projectedVoxels.push_back(Point2f(voxels[v]->x, voxels[v]->y));
+	}
+	std::vector<int> clusterIndices(voxels.size());
+	double accuracy = kmeans(projectedVoxels, 4, clusterIndices,
+		TermCriteria(TermCriteria::EPS + TermCriteria::COUNT, 10, 1.0), 10, KMEANS_RANDOM_CENTERS);
+
+
+
 	
 	if (m_Glut->dispState == 1 || m_Glut->dispState == 2) {
 
@@ -1031,7 +1050,8 @@ void Glut::drawVoxels()
 		
 		if (m_Glut->dispState != 3)
 		{
-			if (m_Glut->dispState == 0) glColor4f(0.5f, 0.5f, 0.5f, 0.5f);
+			Point3f col = colors[clusterIndices[v]];
+			if (m_Glut->dispState == 0) glColor4f(col.x, col.y, col.z, 0.5f);
 			glVertex3f((GLfloat)voxels[v]->x, (GLfloat)voxels[v]->y, (GLfloat)voxels[v]->z);
 		}
 		
