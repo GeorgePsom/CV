@@ -929,7 +929,7 @@ void Glut::drawVoxels()
 			
 			
 			
-			Point3f col = colorsAvg.at(cameraIndex).at(clusterIndex);
+			Point3f col = m_Glut->getScene3d().getColorModel().at(cameraIndex).at(clusterIndex);
 			
 			
 			glColor4f(col.x / 255.0f, col.y / 255.0f, col.z / 255.0f, 1.0f);
