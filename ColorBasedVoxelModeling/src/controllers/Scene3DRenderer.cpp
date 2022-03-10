@@ -69,7 +69,7 @@ Scene3DRenderer::Scene3DRenderer(
 	createFloorGrid();
 	setTopView();
 
-	calcThresholds(m_cameras[1]);
+	//calcThresholds(m_cameras[1]);
 
 	//m_h_threshold = 213;
 	//m_s_threshold = 154;
