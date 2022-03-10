@@ -52,9 +52,10 @@ class Glut
 	static void drawInfo();
 	static void drawMesh();
 
-	static std::vector<int> matchColorInds(std::vector<std::vector<cv::Point3f>> colorsAvg, int clustSize);
+	static void matchColorInds(std::vector<std::vector<cv::Point3f>>& colorsAvg, std::vector<int>& inds, int clustSize);
 
-	static std::vector<std::vector<cv::Point3f>> findColModel(std::vector<int> clusterIndices, std::vector<cv::Point2f> clusterCenters, bool offline);
+	static void findColModel(std::vector<int>& clusterIndices, std::vector<cv::Point2f>& clusterCenters,
+		std::vector<std::vector<cv::Point3f>>& avgColors, bool offline);
 
 	static inline void perspectiveGL(
 			GLdouble, GLdouble, GLdouble, GLdouble);
