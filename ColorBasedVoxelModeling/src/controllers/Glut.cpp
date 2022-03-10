@@ -932,7 +932,7 @@ void Glut::drawVoxels()
 			
 			
 			
-			Point3f col = m_Glut->getScene3d().getColorModel().at(cameraIndex).at(clusterIndex);
+			//Point3f col = m_Glut->getScene3d().getColorModel().at(cameraIndex).at(clusterIndex);
 			
 			
 
@@ -979,83 +979,7 @@ void Glut::drawVoxels()
 	glPopMatrix();
 }
 
-void Glut::findColModel(std::vector<int>& clusterIndices, std::vector<cv::Point2f>& clusterCenters,
-	std::vector<std::vector<cv::Point3f>>& colorsAvg, bool offline)
-{
-	const vector<Camera*>& cameras = m_Glut->getScene3d().getCameras();
-	vector<Mat> images;
-	vector<Reconstructor::Voxel*> voxels = m_Glut->getScene3d().getReconstructor().getVisibleVoxels();
-	vector<Point3f> c_locations;
-	vector<Mat> backgroundImages;
-	vector<bool> voxelsForeground = m_Glut->getScene3d().getReconstructor().getForegroundVoxels();
 
-	/*vector<vector<Point3f>> colorsAvg(cameras.size(), vector<Point3f>(clusterCenters.size(), Point3f(0, 0, 0)));*/
-	vector<vector<int>> colorsCount(cameras.size(), vector<int>(clusterCenters.size(),0));
-
-
-	
-
-	for (size_t v = 0; v < cameras.size(); v++)
-	{
-		images.push_back(cameras[v]->getVideoFrame(m_Glut->getScene3d().getCurrentFrame()));
-		c_locations.push_back(cameras[v]->getCameraLocation());
-		backgroundImages.push_back(cameras[v]->getBackgroundImage());
-	}
-	
-
-	for (size_t v = 0; v < voxels.size(); v++)
-	{
-		
-		float col_x, col_y, col_z, back_x, back_y, back_z;
-		int ind;
-
-
-		if ((voxelsForeground[voxels[v]->frontInd] == false || voxelsForeground[voxels[v]->leftInd] == false || voxelsForeground[voxels[v]->rightInd] == false)
-			&& voxels[v]->z > 1024)
-		{
-					
-		
-
-			for (size_t m = 0; m < cameras.size(); m++) {
-
-				col_z = images[m].at<Vec3b>(voxels[v]->camera_projection[m].y, voxels[v]->camera_projection[m].x)[0];
-				col_y = images[m].at<Vec3b>(voxels[v]->camera_projection[m].y, voxels[v]->camera_projection[m].x)[1];
-				col_x = images[m].at<Vec3b>(voxels[v]->camera_projection[m].y, voxels[v]->camera_projection[m].x)[2];
-
-				// find background pixel color
-				back_z = backgroundImages[m].at<Vec3b>(voxels[v]->camera_projection[m].y, voxels[v]->camera_projection[m].x)[0];
-				back_y = backgroundImages[m].at<Vec3b>(voxels[v]->camera_projection[m].y, voxels[v]->camera_projection[m].x)[1];
-				back_x = backgroundImages[m].at<Vec3b>(voxels[v]->camera_projection[m].y, voxels[v]->camera_projection[m].x)[2];
-
-				float colDist = 15.0f;
-				
-				// if difference with background
-				if (abs(col_x - back_x) > colDist || abs(col_y - back_y) > colDist || abs(col_z - back_z) > colDist) {
-					colorsAvg[m][clusterIndices[v]].x += col_x;
-					colorsAvg[m][clusterIndices[v]].y += col_y;
-					colorsAvg[m][clusterIndices[v]].z += col_z;
-					colorsCount[m][clusterIndices[v]]++;
-				}
-			}
-		}
-		
-	}
-
-	// calculate mean
-	for (int i = 0; i < clusterCenters.size(); i++)
-	{
-		for (size_t m = 0; m < cameras.size(); m++) {
-			colorsAvg[m][i].x /= colorsCount[m][i];
-			colorsAvg[m][i].y /= colorsCount[m][i];
-			colorsAvg[m][i].z /= colorsCount[m][i];
-
-			/*std::cout << "Cluster" << i << ": " << colorsAvg[m][i] << std::endl;
-			std::cout << "ClusterCount" << i << ": " << colorsCount[m][i] << std::endl;*/
-		}
-	}
-
-	return;
-}
 
 void Glut::trainGMM(std::vector<int>& clusterIndices)
 {
@@ -1067,7 +991,7 @@ void Glut::trainGMM(std::vector<int>& clusterIndices)
 	vector<Mat> backgroundImages;
 	vector<bool> voxelsForeground = m_Glut->getScene3d().getReconstructor().getForegroundVoxels();
 
-	
+	int clustNum = 5;
 
 
 
@@ -1087,8 +1011,9 @@ void Glut::trainGMM(std::vector<int>& clusterIndices)
 		
 
 
-		if ((voxelsForeground[voxels[v]->frontInd] == false || voxelsForeground[voxels[v]->leftInd] == false || voxelsForeground[voxels[v]->rightInd] == false)
-			&& voxels[v]->z > 1024)
+		//if ((voxelsForeground[voxels[v]->frontInd] == false || voxelsForeground[voxels[v]->leftInd] == false || voxelsForeground[voxels[v]->rightInd] == false)
+		//	&& voxels[v]->z > 1024)
+		if (voxels[v]->z > 1024)
 		{
 			
 			col_z = images[1].at<Vec3b>(voxels[v]->camera_projection[1].y, voxels[v]->camera_projection[1].x)[0];
@@ -1109,6 +1034,7 @@ void Glut::trainGMM(std::vector<int>& clusterIndices)
 			
 		}
 	}
+
 	for (int i = 0; i < 4; i++)
 	{
 		inputsMat.push_back(new Mat(inputs[i].size(), 3, CV_64FC1));
@@ -1138,7 +1064,7 @@ void Glut::trainGMM(std::vector<int>& clusterIndices)
 	{
 		cv::Ptr<cv::ml::EM> model;
 		model = cv::ml::EM::create();
-		model->setClustersNumber(3);
+		model->setClustersNumber(clustNum);
 		model->setCovarianceMatrixType(cv::ml::EM::COV_MAT_SPHERICAL);
 		model->setTermCriteria(TermCriteria(TermCriteria::EPS + TermCriteria::COUNT, 100, 0.1));
 		Mat input = *inputsMat[i];
@@ -1151,40 +1077,111 @@ void Glut::trainGMM(std::vector<int>& clusterIndices)
 
 void Glut::predictGMM(std::vector<int>& inds, std::vector<int>& clusterIndices)
 {
+	const vector<Camera*>& cameras = m_Glut->getScene3d().getCameras();
+	vector<Mat> images;
 	vector<Reconstructor::Voxel*> voxels = m_Glut->getScene3d().getReconstructor().getVisibleVoxels();
-	std::vector<std::vector<Point3f>> clusteredVoxels;
-	std::vector<std::vector<int>> clusteredVoxelsInds;
-	clusteredVoxelsInds.resize(4);
-	clusteredVoxels.resize(4);
-	for (int v = 0; v < voxels.size(); v++)
+	vector<Point3f> c_locations;
+	vector<Mat> backgroundImages;
+	vector<Mat> foregroundImages;
+	vector<bool> voxelsForeground = m_Glut->getScene3d().getReconstructor().getForegroundVoxels();
+
+	int clustNum = 5;
+
+	int contourThres = 100;
+	int contourMaxCount = 0;
+	int camInd = 1;
+
+	for (size_t v = 0; v < cameras.size(); v++)
 	{
-		clusteredVoxels[clusterIndices[v]].push_back(Point3f(voxels[v]->x, voxels[v]->y, voxels[v]->z));
-		clusteredVoxelsInds[clusterIndices[v]].push_back(v);
-		
+		images.push_back(cameras[v]->getVideoFrame(m_Glut->getScene3d().getCurrentFrame()));
+		c_locations.push_back(cameras[v]->getCameraLocation());
+		backgroundImages.push_back(cameras[v]->getBackgroundImage());
+		foregroundImages.push_back(cameras[v]->getForegroundImage());
+
+		vector<vector<Point>> contours;
+		vector<Vec4i> hierarchy;
+		int contourCount = 0;
+
+		findContours(foregroundImages[v], contours, hierarchy,
+			RETR_CCOMP, CHAIN_APPROX_SIMPLE);
+
+		for (int i = 0; i < contours.size(); i++)
+		{
+			if (contours[i].size() > contourThres) contourCount++;
+		}
+
+		if (contourCount > contourMaxCount)
+		{
+			contourMaxCount = contourCount;
+			camInd = v;
+		}
+	}
+
+	std::cout << "Camera: " << camInd << "  num of contours: " << contourMaxCount << std::endl;
+
+
+	std::vector<std::vector<Point3f>> inputs;
+	std::vector<Mat*> inputsMat;
+	inputs.resize(4);
+	for (int v = 0; v < clusterIndices.size(); v++)
+	{
+		float col_x, col_y, col_z, back_x, back_y, back_z;
+
+
+
+		//if ((voxelsForeground[voxels[v]->frontInd] == false || voxelsForeground[voxels[v]->leftInd] == false || voxelsForeground[voxels[v]->rightInd] == false)
+		//	&& voxels[v]->z > 1024)
+		if (voxels[v]->z > 1024)
+		{
+
+			col_z = images[camInd].at<Vec3b>(voxels[v]->camera_projection[camInd].y, voxels[v]->camera_projection[camInd].x)[0];
+			col_y = images[camInd].at<Vec3b>(voxels[v]->camera_projection[camInd].y, voxels[v]->camera_projection[camInd].x)[1];
+			col_x = images[camInd].at<Vec3b>(voxels[v]->camera_projection[camInd].y, voxels[v]->camera_projection[camInd].x)[2];
+
+			// find background pixel color
+			back_z = backgroundImages[camInd].at<Vec3b>(voxels[v]->camera_projection[camInd].y, voxels[v]->camera_projection[camInd].x)[0];
+			back_y = backgroundImages[camInd].at<Vec3b>(voxels[v]->camera_projection[camInd].y, voxels[v]->camera_projection[camInd].x)[1];
+			back_x = backgroundImages[camInd].at<Vec3b>(voxels[v]->camera_projection[camInd].y, voxels[v]->camera_projection[camInd].x)[2];
+
+			float colDist = 15.0f;
+
+			// if difference with background
+			if (abs(col_x - back_x) > colDist || abs(col_y - back_y) > colDist || abs(col_z - back_z) > colDist) {
+				inputs[clusterIndices[v]].push_back(Point3f(col_x, col_y, col_z));
+			}
+
+		}
 	}
 
 	std::vector<Mat*> clusterMats;
+
 	for (int i = 0; i < 4; i++)
 	{
-		clusterMats.push_back(new Mat(clusteredVoxels[i].size(), 3, CV_64FC1));
-		for (int j = 0; j < clusteredVoxels[i].size(); j++)
+		clusterMats.push_back(new Mat(inputs[i].size(), 3, CV_64FC1));
+		for (int j = 0; j < inputs[i].size(); j++)
 		{
-			int x = clusteredVoxels[i][j].x;
-			int y = clusteredVoxels[i][j].y;
-			int z = clusteredVoxels[i][j].z;
+			int x = inputs[i][j].x;
+			int y = inputs[i][j].y;
+			int z = inputs[i][j].z;
 
-			
+			/*std::cout << x << std::endl;
+			std::cout << y << std::endl;
+			std::cout << z << std::endl;*/
 
 			clusterMats[i]->at<double>(j, 0) = x;
 			clusterMats[i]->at<double>(j, 1) = y;
 			clusterMats[i]->at<double>(j, 2) = z;
 
 
+
+
 		}
 
 	}
 
-	for (int k = 0; k < clusteredVoxels.size(); k++)
+	vector<vector<double>> sums(clusterMats.size(), vector<double>(4, 0));
+
+	for (int k = 0; k < clusterMats.size(); k++)
 	{
 		float maxLikelihood = 0.0f;
 		int cluster;
@@ -1192,22 +1189,176 @@ void Glut::predictGMM(std::vector<int>& inds, std::vector<int>& clusterIndices)
 		{
 			Vec3f test(1.0f, 1.0f, 1.0f);
 			//std::vector<std::vector<float>> probMatrix(clusteredVoxels[k].size(), std::vector<float>(4, 0.0f));
-			Mat probMatrix(clusteredVoxels[k].size(), 3, CV_64FC1);
+			Mat probMatrix(inputs[k].size(), clustNum, CV_64FC1);
+
+			//std::cout << probMatrix.size().width << std::endl;
+
 			float prediction = m_Glut->em_models[e]->predict(*clusterMats[k], probMatrix);
-			int psol = 5;
+
+			//Mat probMatrix(1, 3, CV_64FC1);
+
+			//std::cout << m_Glut->em_models[e]->getWeights() << std::endl;
+
+			Mat weights = m_Glut->em_models[e]->getWeights();
+
+			//std::cout << probMatrix.size().width << std::endl;
+
+			//Vec2d prediction = m_Glut->em_models[e]->predict2(clusterMats[k]->at<double>(k), probMatrix);
+
+			
+			
+			//double sum = 0;
+			vector<double> counts(clustNum,0);
+
+			for (int i = 0; i < probMatrix.size().height; i++)
+			{
+				float max = 0;
+				int clust = 0;
+				for (int j = 0; j < clustNum; j++)
+				{
+					if (probMatrix.at<double>(i,j) > max)
+					{
+						max = probMatrix.at<double>(i, j);
+						clust = j;
+					}
+				}
+
+				//sum += max;
+				counts[clust]++;
+			}
+
+			float distSum = 0;
+
+			for (int j = 0; j < clustNum; j++) {
+				counts[j] = double(counts[j])/ double(inputs[k].size());
+
+				distSum += (counts[j] - weights.at<double>(j)) * (counts[j] - weights.at<double>(j));
+
+				//std::cout << "Weight" << weights.at<double>(j) << std::endl;
+
+				//std::cout << distSum << std::endl;
+			}
+
+			//sums[k][e] = sum / inputs[k].size();
+
+			sums[k][e] = distSum;
+
+
+
+
+			/*int psol = 5;
 			for (int n = 0; n < clusteredVoxels[k].size(); n++)
 			{
 				Mat r = (probMatrix * Mat(test));
 				std::cout << r.row(n) << std::endl;
 
-			}
-			std::cout << "Done " << std::endl;
+			}*/
+			//std::cout << "Done " << std::endl;
 
 		}
 
 	}
 
+	for (int k = 0; k < clusterMats.size(); k++)
+	{
+		double min = 1000000;
+		for (int e = 0; e < 4; e++)
+		{
+			if (sums[k][e] < min)
+			{
+				bool found = false;
+				for (int i = 0; i < k; i++)
+				{
+					if (e == inds[i]) found = true;
+				}
 
+				if (found == false) {
+					min = sums[k][e];
+					inds[k] = e;
+				}
+			}
+		}
+	}
+
+}
+
+
+void Glut::findColModel(std::vector<int>& clusterIndices, std::vector<cv::Point2f>& clusterCenters,
+	std::vector<std::vector<cv::Point3f>>& colorsAvg, bool offline)
+{
+	const vector<Camera*>& cameras = m_Glut->getScene3d().getCameras();
+	vector<Mat> images;
+	vector<Reconstructor::Voxel*> voxels = m_Glut->getScene3d().getReconstructor().getVisibleVoxels();
+	vector<Point3f> c_locations;
+	vector<Mat> backgroundImages;
+	vector<bool> voxelsForeground = m_Glut->getScene3d().getReconstructor().getForegroundVoxels();
+
+	/*vector<vector<Point3f>> colorsAvg(cameras.size(), vector<Point3f>(clusterCenters.size(), Point3f(0, 0, 0)));*/
+	vector<vector<int>> colorsCount(cameras.size(), vector<int>(clusterCenters.size(), 0));
+
+
+
+
+	for (size_t v = 0; v < cameras.size(); v++)
+	{
+		images.push_back(cameras[v]->getVideoFrame(m_Glut->getScene3d().getCurrentFrame()));
+		c_locations.push_back(cameras[v]->getCameraLocation());
+		backgroundImages.push_back(cameras[v]->getBackgroundImage());
+	}
+
+
+	for (size_t v = 0; v < voxels.size(); v++)
+	{
+
+		float col_x, col_y, col_z, back_x, back_y, back_z;
+		int ind;
+
+
+		if ((voxelsForeground[voxels[v]->frontInd] == false || voxelsForeground[voxels[v]->leftInd] == false || voxelsForeground[voxels[v]->rightInd] == false)
+			&& voxels[v]->z > 1024)
+		{
+
+
+
+			for (size_t m = 0; m < cameras.size(); m++) {
+
+				col_z = images[m].at<Vec3b>(voxels[v]->camera_projection[m].y, voxels[v]->camera_projection[m].x)[0];
+				col_y = images[m].at<Vec3b>(voxels[v]->camera_projection[m].y, voxels[v]->camera_projection[m].x)[1];
+				col_x = images[m].at<Vec3b>(voxels[v]->camera_projection[m].y, voxels[v]->camera_projection[m].x)[2];
+
+				// find background pixel color
+				back_z = backgroundImages[m].at<Vec3b>(voxels[v]->camera_projection[m].y, voxels[v]->camera_projection[m].x)[0];
+				back_y = backgroundImages[m].at<Vec3b>(voxels[v]->camera_projection[m].y, voxels[v]->camera_projection[m].x)[1];
+				back_x = backgroundImages[m].at<Vec3b>(voxels[v]->camera_projection[m].y, voxels[v]->camera_projection[m].x)[2];
+
+				float colDist = 15.0f;
+
+				// if difference with background
+				if (abs(col_x - back_x) > colDist || abs(col_y - back_y) > colDist || abs(col_z - back_z) > colDist) {
+					colorsAvg[m][clusterIndices[v]].x += col_x;
+					colorsAvg[m][clusterIndices[v]].y += col_y;
+					colorsAvg[m][clusterIndices[v]].z += col_z;
+					colorsCount[m][clusterIndices[v]]++;
+				}
+			}
+		}
+
+	}
+
+	// calculate mean
+	for (int i = 0; i < clusterCenters.size(); i++)
+	{
+		for (size_t m = 0; m < cameras.size(); m++) {
+			colorsAvg[m][i].x /= colorsCount[m][i];
+			colorsAvg[m][i].y /= colorsCount[m][i];
+			colorsAvg[m][i].z /= colorsCount[m][i];
+
+			/*std::cout << "Cluster" << i << ": " << colorsAvg[m][i] << std::endl;
+			std::cout << "ClusterCount" << i << ": " << colorsCount[m][i] << std::endl;*/
+		}
+	}
+
+	return;
 }
 
 void Glut::matchColorInds(vector<vector<Point3f>>& colorsAvg, std::vector<int>& inds, int clustSize)
