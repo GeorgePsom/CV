@@ -932,7 +932,15 @@ void Glut::drawVoxels()
 			Point3f col = m_Glut->getScene3d().getColorModel().at(cameraIndex).at(clusterIndex);
 			
 			
+
+
 			glColor4f(col.x / 255.0f, col.y / 255.0f, col.z / 255.0f, 1.0f);
+			
+			/*if (clusterIndices[v] == 0) glColor4f(1.0f, 1.0f, 0.0f, 1.0f);
+			if (clusterIndices[v] == 1) glColor4f(0.0f, 1.0f, 1.0f, 1.0f);
+			if (clusterIndices[v] == 2) glColor4f(0.0f, 1.0f, 0.0f, 1.0f);
+			if (clusterIndices[v] == 3) glColor4f(1.0f, 0.0f, 0.0f, 1.0f);*/
+
 			glVertex3f((GLfloat)voxels[v]->x, (GLfloat)voxels[v]->y, (GLfloat)voxels[v]->z);
 		}
 	}
@@ -956,6 +964,12 @@ void Glut::drawVoxels()
 				mesh.m_vecVertices[mesh.m_vecTriangleIndices[i]].position.getY(),
 				mesh.m_vecVertices[mesh.m_vecTriangleIndices[i]].position.getZ());
 		}
+	}*/
+
+	/*for (size_t v = 0; v < voxels.size(); v++) {
+		glColor4f(1.0f, 0.0f, 0.0f, 1.0f);
+
+		glVertex3f((GLfloat)voxels[v]->x, (GLfloat)voxels[v]->y, (GLfloat)voxels[v]->z);
 	}*/
 	
 	glEnd();

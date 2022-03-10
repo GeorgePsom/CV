@@ -71,6 +71,18 @@ Scene3DRenderer::Scene3DRenderer(
 
 	calcThresholds(m_cameras[1]);
 
+	//m_h_threshold = 213;
+	//m_s_threshold = 154;
+	//m_v_threshold = 17;
+
+	//m_h_threshold = 159;
+	//m_s_threshold = 77;
+	//m_v_threshold = 25;
+
+	m_h_threshold = 210;
+	m_s_threshold = 194;
+	m_v_threshold = 30;
+
 	createTrackbar("Frame", VIDEO_WINDOW, &m_current_frame, m_number_of_frames - 2);
 	createTrackbar("H", VIDEO_WINDOW, &m_h_threshold, 255);
 	createTrackbar("S", VIDEO_WINDOW, &m_s_threshold, 255);
@@ -210,21 +222,29 @@ void Scene3DRenderer::calcThresholds(
 Mat Scene3DRenderer::imgProcPipeline(Mat hsv_image, Mat foreground)
 {
 
+
+	//erode(foreground, foreground, getStructuringElement(MORPH_ELLIPSE, Size(2, 2)), Point(-1, 1));
+
+	//dilate(foreground, foreground, getStructuringElement(MORPH_ELLIPSE, Size(12, 12)), Point(-1, 1));
+	//dilate(foreground, foreground, getStructuringElement(MORPH_ELLIPSE, Size(4, 4)), Point(-1, 1));
+
+	//erode(foreground, foreground, getStructuringElement(MORPH_ELLIPSE, Size(2, 2)), Point(-1, 1));
+
 	Mat greenMask;
-	inRange(hsv_image, Scalar(60, 100, 80), Scalar(88, 255, 150), greenMask);
+	inRange(hsv_image, Scalar(70, 100, 80), Scalar(88, 255, 150), greenMask);
 	bitwise_not(greenMask, greenMask);
 
-	bitwise_and(foreground, greenMask, foreground);
+	//bitwise_and(foreground, greenMask, foreground);
 
-	erode(foreground, foreground, getStructuringElement(MORPH_ELLIPSE, Size(2, 2)), Point(-1, 1));
+	dilate(foreground, foreground, getStructuringElement(MORPH_ELLIPSE, Size(9, 9)), Point(-1, 1));
 
-	dilate(foreground, foreground, getStructuringElement(MORPH_ELLIPSE, Size(4, 4)), Point(-1, 1));
-	dilate(foreground, foreground, getStructuringElement(MORPH_ELLIPSE, Size(4, 4)), Point(-1, 1));
+	erode(foreground, foreground, getStructuringElement(MORPH_ELLIPSE, Size(4, 4)), Point(-1, 1));
 
+	
 	vector<vector<Point> > contours;
 	vector<Vec4i> hierarchy;
 
-	int contourThres = 100;
+	int contourThres = 50;
 
 	findContours(foreground, contours, hierarchy,
 		RETR_CCOMP, CHAIN_APPROX_SIMPLE);
@@ -244,7 +264,7 @@ Mat Scene3DRenderer::imgProcPipeline(Mat hsv_image, Mat foreground)
 
 			if (contours[idx].size() > contourThres)
 			{
-				drawContours(foreground, contours, idx, 255, FILLED);
+				//drawContours(foreground, contours, idx, 255, FILLED);
 			}
 
 		}
@@ -267,7 +287,7 @@ Mat Scene3DRenderer::imgProcPipeline(Mat hsv_image, Mat foreground)
 
 			if (contoursNew[idx].size() > contourThres)
 			{
-				drawContours(foreground, contoursNew, idx, 255, FILLED);
+				//drawContours(foreground, contoursNew, idx, 255, FILLED);
 			}
 			else
 			{
@@ -279,7 +299,7 @@ Mat Scene3DRenderer::imgProcPipeline(Mat hsv_image, Mat foreground)
 
 	contoursNew.clear();
 
-	dilate(foreground, foreground, getStructuringElement(MORPH_ELLIPSE, Size(4, 4)), Point(-1, 1));
+	//dilate(foreground, foreground, getStructuringElement(MORPH_ELLIPSE, Size(4, 4)), Point(-1, 1));
 
 	findContours(foreground, contoursNew, hierarchyNew,
 		RETR_CCOMP, CHAIN_APPROX_SIMPLE);
@@ -294,17 +314,41 @@ Mat Scene3DRenderer::imgProcPipeline(Mat hsv_image, Mat foreground)
 
 			if (contoursNew[idx].size() > contourThres)
 			{
-				drawContours(foreground, contoursNew, idx, 255, FILLED);
+				//drawContours(foreground, contoursNew, idx, 255, FILLED);
 			}
 		}
 	}
 
-	inRange(hsv_image, Scalar(55, 100, 80), Scalar(85, 255, 200), greenMask);
-	bitwise_not(greenMask, greenMask);
-	bitwise_and(foreground, greenMask, foreground);
+	//inRange(hsv_image, Scalar(55, 100, 80), Scalar(85, 255, 200), greenMask);
+	//bitwise_and(foreground, greenMask2, foreground);
+
+	//dilate(foreground, foreground, getStructuringElement(MORPH_ELLIPSE, Size(3, 3)), Point(-1, 1));
+
+	//Mat greenMask2;
+	//inRange(hsv_image, Scalar(60, 100, 80), Scalar(88, 255, 150), greenMask2);
+	//bitwise_not(greenMask2, greenMask2);
+	//bitwise_and(foreground, greenMask2, foreground);
 
 
-	erode(foreground, foreground, getStructuringElement(MORPH_ELLIPSE, Size(2, 2)), Point(-1, 1));
+	erode(foreground, foreground, getStructuringElement(MORPH_ELLIPSE, Size(7, 7)), Point(-1, 1));
+
+	dilate(foreground, foreground, getStructuringElement(MORPH_ELLIPSE, Size(20, 20)), Point(-1, 1));
+	
+	erode(foreground, foreground, getStructuringElement(MORPH_ELLIPSE, Size(12, 12)), Point(-1, 1));
+
+	dilate(foreground, foreground, getStructuringElement(MORPH_ELLIPSE, Size(3, 3)), Point(-1, 1));
+
+	erode(foreground, foreground, getStructuringElement(MORPH_ELLIPSE, Size(5, 5)), Point(-1, 1));
+
+	Mat greenMask3;
+	inRange(hsv_image, Scalar(60, 100, 80), Scalar(88, 255, 150), greenMask3);
+	bitwise_not(greenMask3, greenMask3);
+	bitwise_and(foreground, greenMask3, foreground);
+
+	Mat greenMask2;
+	inRange(hsv_image, Scalar(60, 100, 80), Scalar(88, 255, 150), greenMask2);
+	bitwise_not(greenMask2, greenMask2);
+	bitwise_and(foreground, greenMask2, foreground);
 
 	return foreground;
 }
