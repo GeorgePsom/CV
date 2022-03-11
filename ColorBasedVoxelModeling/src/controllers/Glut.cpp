@@ -1119,6 +1119,7 @@ void Glut::predictGMM(std::vector<int>& inds, std::vector<int>& clusterIndices)
 
 	std::cout << "Camera: " << camInd << "  num of contours: " << contourMaxCount << std::endl;
 
+	
 
 	std::vector<std::vector<Point3f>> inputs;
 	std::vector<Mat*> inputsMat;
@@ -1259,7 +1260,42 @@ void Glut::predictGMM(std::vector<int>& inds, std::vector<int>& clusterIndices)
 
 	}
 
-	for (int k = 0; k < clusterMats.size(); k++)
+	double min = 1000000;
+	for (int i = 0; i < clusterMats.size(); i++)
+	{
+		for (int k = 0; k < clusterMats.size(); k++)
+		{
+			for (int l = 0; l < clusterMats.size(); l++)
+			{
+				for (int m = 0; m < clusterMats.size(); m++)
+				{
+					if (i != k && i != l && i != m && k != l && k != m && l != m)
+					{
+						if (sums[0][i] + sums[1][k] + sums[2][l] + sums[3][m] < min)
+						{
+							min = sums[0][i] + sums[1][k] + sums[2][l] + sums[3][m];
+							inds[0] = i;
+							inds[1] = k;
+							inds[2] = l;
+							inds[3] = m;
+						}
+					}
+				}
+			}
+		}
+	}
+	std::cout << "Min" << min << std::endl;
+	std::cout << sums[0][inds[0]] << std::endl;
+	std::cout << sums[1][inds[1]] << std::endl;
+	std::cout << sums[2][inds[2]] << std::endl;
+	std::cout << sums[3][inds[3]] << std::endl;
+	std::cout << inds[0] << std::endl;
+	std::cout << inds[1] << std::endl;
+	std::cout << inds[2] << std::endl;
+	std::cout << inds[3] << std::endl;
+
+
+	/*for (int k = 0; k < clusterMats.size(); k++)
 	{
 		double min = 1000000;
 		for (int e = 0; e < 4; e++)
@@ -1278,7 +1314,8 @@ void Glut::predictGMM(std::vector<int>& inds, std::vector<int>& clusterIndices)
 				}
 			}
 		}
-	}
+		std::cout << "Min" << min << std::endl;
+	}*/
 
 }
 
