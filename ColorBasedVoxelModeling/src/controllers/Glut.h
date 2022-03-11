@@ -30,6 +30,7 @@
 #include <opencv2/ml/ml.hpp>
 #include <opencv2/opencv.hpp>
 #include <vector>
+#include "Reconstructor.h"
 
 namespace nl_uu_science_gmt
 {
@@ -43,10 +44,12 @@ class Glut
 	PolyVox::SimpleVolume<uint8_t>* volData;
 	int dispState = 0; // 0 for voxels, 1 for colored voxels filled with black, 2 for all colored voxels, 3 for mesh
 
+	std::vector<cv::Point2f> allClCenters;
+
 	static Glut* m_Glut;
 	std::vector<cv::Ptr<cv::ml::EM>> em_models;
 	std::vector<cv::Point2f> clCenters;
-	std::vector<cv::Point2f> allClCenters;
+
 	static void drawGrdGrid();
 	static void drawCamCoord();
 	static void drawVolume();
@@ -61,8 +64,8 @@ class Glut
 	static void findColModel(std::vector<int>& clusterIndices, std::vector<cv::Point2f>& clusterCenters,
 		std::vector<std::vector<cv::Point3f>>& avgColors, bool offline);
 
-	static void trainGMM(std::vector<int>& clusterIndices);
-	static void predictGMM(std::vector<int>& inds, std::vector<int>& clusterIndices);
+	static void trainGMM(std::vector<int>& clusterIndices, std::vector<Reconstructor::Voxel*> voxels);
+	static void predictGMM(std::vector<int>& inds, std::vector<int>& clusterIndices, std::vector<Reconstructor::Voxel*> voxels);
 
 	static inline void perspectiveGL(
 			GLdouble, GLdouble, GLdouble, GLdouble);
