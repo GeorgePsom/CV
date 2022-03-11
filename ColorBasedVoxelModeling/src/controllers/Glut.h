@@ -45,7 +45,8 @@ class Glut
 
 	static Glut* m_Glut;
 	std::vector<cv::Ptr<cv::ml::EM>> em_models;
-
+	std::vector<cv::Point2f> clCenters;
+	std::vector<cv::Point2f> allClCenters;
 	static void drawGrdGrid();
 	static void drawCamCoord();
 	static void drawVolume();

@@ -873,9 +873,34 @@ void Glut::drawVoxels()
 		projectedVoxels.push_back(Point2f(voxels[v]->x, voxels[v]->y));
 	}
 	std::vector<int> clusterIndices(voxels.size());
-	double accuracy = kmeans(projectedVoxels, 4, clusterIndices,
-		TermCriteria(TermCriteria::EPS + TermCriteria::COUNT, 10, 1.0), 10, KMEANS_RANDOM_CENTERS, clusterCenters);
 
+
+	if(m_Glut->getScene3d().getCurrentFrame() == 1)
+		double accuracy = kmeans(projectedVoxels, 4, clusterIndices,
+			TermCriteria(TermCriteria::EPS + TermCriteria::COUNT, 100, 1.0), 10, KMEANS_RANDOM_CENTERS, clusterCenters);
+	else
+	{
+		clusterCenters = m_Glut->clCenters;
+		for (int v = 0; v < projectedVoxels.size(); v++)
+		{
+			double minDist = 10000000.0;
+			for (int c = 0; c < 4; c++)
+			{
+				
+				float d = cv::norm(clusterCenters[c] - projectedVoxels[v]);
+				if (d < minDist)
+				{
+					minDist = d;
+					clusterIndices[v] = c;
+				}
+
+			}
+		}
+
+		double accuracy = kmeans(projectedVoxels, 4, clusterIndices,
+			TermCriteria(TermCriteria::EPS + TermCriteria::COUNT, 100, 1.0), 20, KMEANS_USE_INITIAL_LABELS, clusterCenters);
+	}
+		
 	
 	glPushMatrix();
 
@@ -901,26 +926,69 @@ void Glut::drawVoxels()
 
 	// set the ground truth for the first frame
 	vector<vector<Point3f>> colorsAvg(m_Glut->getScene3d().getCameras().size(), vector<Point3f>(clusterCenters.size(), Point3f(0, 0, 0)));
-	
+	std::vector<int> inds(clusterCenters.size(), 0);
 	if (m_Glut->getScene3d().getCurrentFrame() == 1)
 	{
-		trainGMM(clusterIndices);
+		//GMM
+		//trainGMM(clusterIndices);
+
+
 		//findColModel(clusterIndices, clusterCenters, colorsAvg, true);
 		
 		//m_Glut->getScene3d().updateColorModel(colorsAvg);
+		m_Glut->clCenters.resize(4);
+		m_Glut->clCenters = clusterCenters;
 	}
 	else
 	{
+		// Match the cluster based on the closest euclidean distance from the previous cluster center.
+		for (int i = 0; i< clusterCenters.size(); i++)
+		{
+			std::vector<int> clustersToAvoid;
+			float minDist = 10000.0f;
+
+			for (int j = 0; j< clusterCenters.size(); j++)
+			{
+				bool skip = false;
+				for (int k = 0; k < clustersToAvoid.size(); k++)
+				{
+					if (j == clustersToAvoid[k])
+					{
+						skip = true;
+						break;
+					}
+				}
+				if (skip) continue;
+				float d = cv::norm(clusterCenters[i] - m_Glut->clCenters[j]);
+				if (d < minDist)
+				{
+					minDist = d;
+					inds[i] = j;
+				}
+
+					
+			}
+
+			clustersToAvoid.push_back(inds[i]);
+
+		}
 		//findColModel(clusterIndices, clusterCenters, colorsAvg, false);
+
+		// Update the previous centers to the current for the next frame
+		for (int i = 0; i < clusterCenters.size(); i++)
+		{
+			m_Glut->clCenters[inds[i]] = clusterCenters[i];
+		}
 		
 	}
-	std::vector<int> inds(clusterCenters.size(), 0);
+	
 	//matchColorInds(colorsAvg, inds, clusterCenters.size());
 
 	
 	
 	int cameraIndex = m_Glut->getScene3d().getCurrentCamera() == -1 ? m_Glut->getScene3d().getPreviousCamera() : m_Glut->getScene3d().getCurrentCamera();
-	predictGMM(inds, clusterIndices);
+	//GMM
+	//predictGMM(inds, clusterIndices);
 	
 	for (size_t v = 0; v < voxels.size(); v++)
 	{
