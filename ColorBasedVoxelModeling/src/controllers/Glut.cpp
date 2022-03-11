@@ -1134,21 +1134,24 @@ void Glut::predictGMM(std::vector<int>& inds, std::vector<int>& clusterIndices)
 		//	&& voxels[v]->z > 1024)
 		if (voxels[v]->z > 1024)
 		{
+			for (int i = 0; i < cameras.size(); i++) {
+				camInd = i;
 
-			col_z = images[camInd].at<Vec3b>(voxels[v]->camera_projection[camInd].y, voxels[v]->camera_projection[camInd].x)[0];
-			col_y = images[camInd].at<Vec3b>(voxels[v]->camera_projection[camInd].y, voxels[v]->camera_projection[camInd].x)[1];
-			col_x = images[camInd].at<Vec3b>(voxels[v]->camera_projection[camInd].y, voxels[v]->camera_projection[camInd].x)[2];
+				col_z = images[camInd].at<Vec3b>(voxels[v]->camera_projection[camInd].y, voxels[v]->camera_projection[camInd].x)[0];
+				col_y = images[camInd].at<Vec3b>(voxels[v]->camera_projection[camInd].y, voxels[v]->camera_projection[camInd].x)[1];
+				col_x = images[camInd].at<Vec3b>(voxels[v]->camera_projection[camInd].y, voxels[v]->camera_projection[camInd].x)[2];
 
-			// find background pixel color
-			back_z = backgroundImages[camInd].at<Vec3b>(voxels[v]->camera_projection[camInd].y, voxels[v]->camera_projection[camInd].x)[0];
-			back_y = backgroundImages[camInd].at<Vec3b>(voxels[v]->camera_projection[camInd].y, voxels[v]->camera_projection[camInd].x)[1];
-			back_x = backgroundImages[camInd].at<Vec3b>(voxels[v]->camera_projection[camInd].y, voxels[v]->camera_projection[camInd].x)[2];
+				// find background pixel color
+				back_z = backgroundImages[camInd].at<Vec3b>(voxels[v]->camera_projection[camInd].y, voxels[v]->camera_projection[camInd].x)[0];
+				back_y = backgroundImages[camInd].at<Vec3b>(voxels[v]->camera_projection[camInd].y, voxels[v]->camera_projection[camInd].x)[1];
+				back_x = backgroundImages[camInd].at<Vec3b>(voxels[v]->camera_projection[camInd].y, voxels[v]->camera_projection[camInd].x)[2];
 
-			float colDist = 15.0f;
+				float colDist = 15.0f;
 
-			// if difference with background
-			if (abs(col_x - back_x) > colDist || abs(col_y - back_y) > colDist || abs(col_z - back_z) > colDist) {
-				inputs[clusterIndices[v]].push_back(Point3f(col_x, col_y, col_z));
+				// if difference with background
+				if (abs(col_x - back_x) > colDist || abs(col_y - back_y) > colDist || abs(col_z - back_z) > colDist) {
+					inputs[clusterIndices[v]].push_back(Point3f(col_x, col_y, col_z));
+				}
 			}
 
 		}
