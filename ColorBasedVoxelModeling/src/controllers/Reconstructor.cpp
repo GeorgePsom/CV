@@ -28,7 +28,7 @@ namespace nl_uu_science_gmt
 Reconstructor::Reconstructor(
 		const vector<Camera*> &cs) :
 				m_cameras(cs),
-				m_height(2048),
+				m_height(3072),
 				m_step(32)
 {
 	for (size_t c = 0; c < m_cameras.size(); ++c)

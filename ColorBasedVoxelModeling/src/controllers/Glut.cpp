@@ -865,6 +865,8 @@ void Glut::drawVoxels()
 	colors[2] = Point3f(0.0f, 0.0f, 255.0f);
 	colors[3] = Point3f(255.0f, 255.0f, 0.0f);
 
+	bool emMode = true;
+
 
 	std::vector<Point2f> projectedVoxels;
 	std::vector<Point2f> clusterCenters(4);
@@ -875,7 +877,7 @@ void Glut::drawVoxels()
 	std::vector<int> clusterIndices(voxels.size());
 
 
-	if(m_Glut->getScene3d().getCurrentFrame() == 1)
+	if(m_Glut->getScene3d().getCurrentFrame() == 1 || emMode==true)
 		double accuracy = kmeans(projectedVoxels, 4, clusterIndices,
 			TermCriteria(TermCriteria::EPS + TermCriteria::COUNT, 100, 1.0), 10, KMEANS_RANDOM_CENTERS, clusterCenters);
 	else
@@ -931,7 +933,7 @@ void Glut::drawVoxels()
 	}
 	else
 	{
-		glPointSize(5.0f);
+		glPointSize(3.0f);
 		glBegin(GL_POINTS);
 	}
 
@@ -963,7 +965,7 @@ void Glut::drawVoxels()
 		projectedVoxelsNew.push_back(Point2f(voxelsNew[v]->x, voxelsNew[v]->y));
 	}
 
-	if (m_Glut->getScene3d().getCurrentFrame() == 1)
+	if (m_Glut->getScene3d().getCurrentFrame() == 1 || emMode == true)
 		double accuracy = kmeans(projectedVoxelsNew, 4, clusterIndicesNew,
 			TermCriteria(TermCriteria::EPS + TermCriteria::COUNT, 100, 1.0), 10, KMEANS_RANDOM_CENTERS, clusterCentersNew);
 	else
@@ -1002,7 +1004,7 @@ void Glut::drawVoxels()
 	if (m_Glut->getScene3d().getCurrentFrame() == 1)
 	{
 		//GMM
-		//trainGMM(clusterIndicesNew, voxelsNew);
+		trainGMM(clusterIndicesNew, voxelsNew);
 
 
 		//findColModel(clusterIndices, clusterCenters, colorsAvg, true);
@@ -1015,49 +1017,74 @@ void Glut::drawVoxels()
 
 		for (int i = 0; i < 4; i++)
 		{
-			m_Glut->allClCenters.push_back(clusterCenters[i]);
+			m_Glut->allClCenters.push_back(clusterCentersNew[i]);
 		}
+
+		inds = { 0,1,2,3 };
+
+		predictGMM(inds, clusterIndicesNew, voxelsNew);
 	}
 	else
 	{
 		// Match the cluster based on the closest euclidean distance from the previous cluster center.
-		for (int i = 0; i< clusterCentersNew.size(); i++)
-		{
-			std::vector<int> clustersToAvoid;
-			float minDist = 10000.0f;
-
-			for (int j = 0; j< clusterCentersNew.size(); j++)
+		
+		if (emMode == false) {
+			for (int i = 0; i < clusterCentersNew.size(); i++)
 			{
-				bool skip = false;
-				for (int k = 0; k < clustersToAvoid.size(); k++)
+				std::vector<int> clustersToAvoid;
+				float minDist = 10000.0f;
+
+				for (int j = 0; j < clusterCentersNew.size(); j++)
 				{
-					if (j == clustersToAvoid[k])
+					bool skip = false;
+					for (int k = 0; k < clustersToAvoid.size(); k++)
 					{
-						skip = true;
-						break;
+						if (j == clustersToAvoid[k])
+						{
+							skip = true;
+							break;
+						}
 					}
-				}
-				if (skip) continue;
-				float d = cv::norm(clusterCentersNew[i] - m_Glut->clCenters[j]);
-				if (d < minDist)
-				{
-					minDist = d;
-					inds[i] = j;
+					if (skip) continue;
+					float d = cv::norm(clusterCentersNew[i] - m_Glut->clCenters[j]);
+					if (d < minDist)
+					{
+						minDist = d;
+						inds[i] = j;
+					}
+
+
 				}
 
-					
+				clustersToAvoid.push_back(inds[i]);
+
 			}
+			//findColModel(clusterIndices, clusterCenters, colorsAvg, false);
 
-			clustersToAvoid.push_back(inds[i]);
-
+			// Update the previous centers to the current for the next frame
 		}
-		//findColModel(clusterIndices, clusterCenters, colorsAvg, false);
+		else if (emMode == true) {
 
-		// Update the previous centers to the current for the next frame
+			inds = { 0,1,2,3 };
+
+			predictGMM(inds, clusterIndicesNew, voxelsNew);
+		}
+
+		int count = 0;
+
 		for (int i = 0; i < clusterCentersNew.size(); i++)
 		{
 			m_Glut->clCenters[inds[i]] = clusterCentersNew[i];
-			m_Glut->allClCenters.push_back(clusterCentersNew[i]);
+
+			if (emMode == true) {
+				for (int j = 0; j < clusterCentersNew.size(); j++) {
+					if (inds[j] == count) {
+						m_Glut->allClCenters.push_back(clusterCentersNew[j]);
+						count++;
+						break;
+					}
+				}
+			}
 		}
 
 
@@ -1108,11 +1135,28 @@ void Glut::drawVoxels()
 	
 	glEnd();
 
-	for (int j = 0; j < 4; j++)
+	/*for (int j = 0; j < 4; j++)
 	{
 		for (int i = j; i < m_Glut->allClCenters.size() - 4; i += 4)
 		{
 			glBegin(GL_LINES);
+			if (j == 0) glColor4f(1.0f, 1.0f, 0.0f, 1.0f);
+			if (j == 1) glColor4f(0.0f, 1.0f, 1.0f, 1.0f);
+			if (j == 2) glColor4f(0.0f, 1.0f, 0.0f, 1.0f);
+			if (j == 3) glColor4f(1.0f, 0.0f, 0.0f, 1.0f);
+			glVertex3f(m_Glut->allClCenters[i].x, m_Glut->allClCenters[i].y, 0.0f);
+			glVertex3f(m_Glut->allClCenters[i + 4].x, m_Glut->allClCenters[i + 4].y, 0.0f);
+
+			glEnd();
+
+		}
+	}*/
+
+	for (int j = 0; j < 4; j++)
+	{
+		for (int i = j; i < m_Glut->allClCenters.size() - 4; i += 4)
+		{
+			glBegin(GL_POINTS);
 			if (j == 0) glColor4f(1.0f, 1.0f, 0.0f, 1.0f);
 			if (j == 1) glColor4f(0.0f, 1.0f, 1.0f, 1.0f);
 			if (j == 2) glColor4f(0.0f, 1.0f, 0.0f, 1.0f);
@@ -1267,7 +1311,7 @@ void Glut::predictGMM(std::vector<int>& inds, std::vector<int>& clusterIndices, 
 		}
 	}
 
-	std::cout << "Camera: " << camInd << "  num of contours: " << contourMaxCount << std::endl;
+	//std::cout << "Camera: " << camInd << "  num of contours: " << contourMaxCount << std::endl;
 
 	
 
