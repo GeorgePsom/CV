@@ -992,9 +992,7 @@ void Glut::drawVoxels()
 	}
 	
 	
-	//PolyVox::SimpleVolume<uint8_t> volData(PolyVox::Region(PolyVox::Vector3DInt32(0, 0, 0), PolyVox::Vector3DInt32(127,127,127)));
 	
-
 	
 
 
@@ -1007,9 +1005,7 @@ void Glut::drawVoxels()
 		trainGMM(clusterIndicesNew, voxelsNew);
 
 
-		//findColModel(clusterIndices, clusterCenters, colorsAvg, true);
-		
-		//m_Glut->getScene3d().updateColorModel(colorsAvg);
+	
 		
 		
 		m_Glut->clCenters.resize(4);
@@ -1069,6 +1065,57 @@ void Glut::drawVoxels()
 
 			predictGMM(inds, clusterIndicesNew, voxelsNew);
 		}
+
+		bool combine = true;
+		if (combine)
+		{
+			float distanceError = 0.0f;
+
+			for (int i = 0; i < clusterCentersNew.size(); i++)
+			{
+				distanceError += 0.25f * cv::norm(m_Glut->clCenters[inds[i]] - clusterCentersNew[i]);
+			}
+
+			float errorThreshold = 40.0f;
+
+			if (distanceError > errorThreshold)
+			{
+				std::cout << "Switch to center tracking" << std::endl;
+				for (int i = 0; i < clusterCentersNew.size(); i++)
+				{
+					std::vector<int> clustersToAvoid;
+					float minDist = 10000.0f;
+
+					for (int j = 0; j < clusterCentersNew.size(); j++)
+					{
+						bool skip = false;
+						for (int k = 0; k < clustersToAvoid.size(); k++)
+						{
+							if (j == clustersToAvoid[k])
+							{
+								skip = true;
+								break;
+							}
+						}
+						if (skip) continue;
+						float d = cv::norm(clusterCentersNew[i] - m_Glut->clCenters[j]);
+						if (d < minDist)
+						{
+							minDist = d;
+							inds[i] = j;
+						}
+
+
+					}
+
+					clustersToAvoid.push_back(inds[i]);
+
+				}
+
+			}
+		}
+
+		
 
 		int count = 0;
 
