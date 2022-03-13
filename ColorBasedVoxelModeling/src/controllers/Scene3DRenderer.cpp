@@ -69,19 +69,7 @@ Scene3DRenderer::Scene3DRenderer(
 	createFloorGrid();
 	setTopView();
 
-	//calcThresholds(m_cameras[1]);
-
-	//m_h_threshold = 213;
-	//m_s_threshold = 154;
-	//m_v_threshold = 17;
-
-	//m_h_threshold = 159;
-	//m_s_threshold = 77;
-	//m_v_threshold = 25;
-
-	m_h_threshold = 210;
-	m_s_threshold = 194;
-	m_v_threshold = 30;
+	calcThresholds(m_cameras[1]);
 
 	createTrackbar("Frame", VIDEO_WINDOW, &m_current_frame, m_number_of_frames - 2);
 	createTrackbar("H", VIDEO_WINDOW, &m_h_threshold, 255);
@@ -152,8 +140,8 @@ void Scene3DRenderer::calcThresholds(
 
 		bitwise_xor(foreground, mask_channels[2], foreground);
 
-		Mat result = imgProcPipeline(hsv_image, foreground);
-		foreground = result;
+		//Mat result = imgProcPipeline(hsv_image, foreground);
+		//foreground = result;
 
 		int nCorrectPixels = pixelNum - countNonZero(foreground);
 		if (nCorrectPixels > max)
@@ -177,8 +165,8 @@ void Scene3DRenderer::calcThresholds(
 		threshold(tmp, foreground, s, 255, CV_THRESH_BINARY);
 		bitwise_xor(foreground, mask_channels[1], foreground);
 
-		Mat result = imgProcPipeline(hsv_image, foreground);
-		foreground = result;
+		//Mat result = imgProcPipeline(hsv_image, foreground);
+		//foreground = result;
 
 		int nCorrectPixels = pixelNum - countNonZero(foreground);
 		if (nCorrectPixels > max)
@@ -203,8 +191,8 @@ void Scene3DRenderer::calcThresholds(
 		
 		bitwise_xor(foreground, mask_channels[0], foreground);
 
-		Mat result = imgProcPipeline(hsv_image, foreground);
-		foreground = result;
+		//Mat result = imgProcPipeline(hsv_image, foreground);
+		//foreground = result;
 
 		int nCorrectPixels = pixelNum - countNonZero(foreground);
 		if (nCorrectPixels > max)

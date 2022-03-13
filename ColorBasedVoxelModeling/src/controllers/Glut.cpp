@@ -877,9 +877,9 @@ void Glut::drawVoxels()
 	std::vector<int> clusterIndices(voxels.size());
 
 
-	if(m_Glut->getScene3d().getCurrentFrame() == 1 || emMode==true)
+	if (m_Glut->getScene3d().getCurrentFrame() == 1 || emMode == true)
 		double accuracy = kmeans(projectedVoxels, 4, clusterIndices,
-			TermCriteria(TermCriteria::EPS + TermCriteria::COUNT, 100, 1.0), 10, KMEANS_RANDOM_CENTERS, clusterCenters);
+			TermCriteria(TermCriteria::EPS + TermCriteria::COUNT, 100, 1.0), 50, KMEANS_RANDOM_CENTERS, clusterCenters);
 	else
 	{
 		clusterCenters = m_Glut->clCenters;
@@ -900,7 +900,7 @@ void Glut::drawVoxels()
 		}
 
 		double accuracy = kmeans(projectedVoxels, 4, clusterIndices,
-			TermCriteria(TermCriteria::EPS + TermCriteria::COUNT, 100, 1.0), 20, KMEANS_USE_INITIAL_LABELS, clusterCenters);
+			TermCriteria(TermCriteria::EPS + TermCriteria::COUNT, 100, 1.0), 50, KMEANS_USE_INITIAL_LABELS, clusterCenters);
 	}
 
 
@@ -933,7 +933,7 @@ void Glut::drawVoxels()
 	}
 	else
 	{
-		glPointSize(3.0f);
+		glPointSize(2.0f);
 		glBegin(GL_POINTS);
 	}
 
@@ -943,7 +943,7 @@ void Glut::drawVoxels()
 	{
 		float tempDist = sqrt(abs(voxels[v]->x - clusterCenters[clusterIndices[v]].x) * abs(voxels[v]->x - clusterCenters[clusterIndices[v]].x)
 			+ abs(voxels[v]->y - clusterCenters[clusterIndices[v]].y) * abs(voxels[v]->y - clusterCenters[clusterIndices[v]].y));
-		if (tempDist < 2 * meanDist[clusterIndices[v]]) {
+		if (tempDist < 1.8 * meanDist[clusterIndices[v]]) {
 
 			voxelsNew.push_back(voxels[v]);
 			//glColor4f(1.0f, 1.0f, 0.0f, 1.0f);
@@ -967,7 +967,7 @@ void Glut::drawVoxels()
 
 	if (m_Glut->getScene3d().getCurrentFrame() == 1 || emMode == true)
 		double accuracy = kmeans(projectedVoxelsNew, 4, clusterIndicesNew,
-			TermCriteria(TermCriteria::EPS + TermCriteria::COUNT, 100, 1.0), 10, KMEANS_RANDOM_CENTERS, clusterCentersNew);
+			TermCriteria(TermCriteria::EPS + TermCriteria::COUNT, 100, 1.0), 50, KMEANS_RANDOM_CENTERS, clusterCentersNew);
 	else
 	{
 		clusterCentersNew = m_Glut->clCenters;
@@ -988,7 +988,7 @@ void Glut::drawVoxels()
 		}
 
 		double accuracy = kmeans(projectedVoxelsNew, 4, clusterIndicesNew,
-			TermCriteria(TermCriteria::EPS + TermCriteria::COUNT, 100, 1.0), 20, KMEANS_USE_INITIAL_LABELS, clusterCentersNew);
+			TermCriteria(TermCriteria::EPS + TermCriteria::COUNT, 100, 1.0), 50, KMEANS_USE_INITIAL_LABELS, clusterCentersNew);
 	}
 	
 	
@@ -1232,7 +1232,7 @@ void Glut::trainGMM(std::vector<int>& clusterIndices, std::vector<Reconstructor:
 	vector<Mat> backgroundImages;
 	vector<bool> voxelsForeground = m_Glut->getScene3d().getReconstructor().getForegroundVoxels();
 
-	int clustNum = 5;
+	int clustNum = 4;
 
 
 
