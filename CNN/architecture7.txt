@@ -1,0 +1,193 @@
+model = Sequential()
+model.add(Conv2D(32, kernel_size = (3, 3), activation = 'relu', input_shape = (28, 28, 1)))
+model.add(MaxPooling2D(pool_size = (2, 2)))
+
+model.add(Conv2D(64, kernel_size = (3, 3), activation = 'relu'))
+model.add(MaxPooling2D(pool_size = (2, 2)))
+model.add(Conv2D(128, kernel_size=(3, 3), activation='relu'))
+model.add(MaxPooling2D(pool_size=(2, 2)))
+model.add(Flatten())
+model.add(Dense(128, activation = 'relu'))
+model.add(Dense(64, activation = 'relu'))
+model.add(Dense(10))
+
+raining for fold 1 ...
+Epoch 1/15
+375/375 - 16s - loss: 0.7405 - accuracy: 0.7295 - 16s/epoch - 41ms/step
+Epoch 2/15
+375/375 - 15s - loss: 0.4830 - accuracy: 0.8230 - 15s/epoch - 40ms/step
+Epoch 3/15
+375/375 - 15s - loss: 0.4088 - accuracy: 0.8521 - 15s/epoch - 40ms/step
+Epoch 4/15
+375/375 - 15s - loss: 0.3725 - accuracy: 0.8631 - 15s/epoch - 40ms/step
+Epoch 5/15
+375/375 - 15s - loss: 0.3405 - accuracy: 0.8734 - 15s/epoch - 40ms/step
+Epoch 6/15
+375/375 - 15s - loss: 0.3201 - accuracy: 0.8815 - 15s/epoch - 40ms/step
+Epoch 7/15
+375/375 - 15s - loss: 0.2993 - accuracy: 0.8890 - 15s/epoch - 40ms/step
+Epoch 8/15
+375/375 - 15s - loss: 0.2844 - accuracy: 0.8936 - 15s/epoch - 40ms/step
+Epoch 9/15
+375/375 - 16s - loss: 0.2661 - accuracy: 0.9008 - 16s/epoch - 42ms/step
+Epoch 10/15
+375/375 - 16s - loss: 0.2502 - accuracy: 0.9067 - 16s/epoch - 41ms/step
+Epoch 11/15
+375/375 - 15s - loss: 0.2389 - accuracy: 0.9101 - 15s/epoch - 40ms/step
+Epoch 12/15
+375/375 - 15s - loss: 0.2273 - accuracy: 0.9153 - 15s/epoch - 40ms/step
+Epoch 13/15
+375/375 - 15s - loss: 0.2119 - accuracy: 0.9211 - 15s/epoch - 40ms/step
+Epoch 14/15
+375/375 - 15s - loss: 0.2009 - accuracy: 0.9256 - 15s/epoch - 40ms/step
+Epoch 15/15
+375/375 - 15s - loss: 0.1905 - accuracy: 0.9284 - 15s/epoch - 40ms/step
+Score for fold 1: loss of 0.3071862459182739; accuracy of 89.79166746139526%
+------------------------------------------------------------------------
+Training for fold 2 ...
+Epoch 1/15
+375/375 - 16s - loss: 0.7381 - accuracy: 0.7348 - 16s/epoch - 42ms/step
+Epoch 2/15
+375/375 - 15s - loss: 0.4711 - accuracy: 0.8303 - 15s/epoch - 41ms/step
+Epoch 3/15
+375/375 - 15s - loss: 0.4049 - accuracy: 0.8520 - 15s/epoch - 40ms/step
+Epoch 4/15
+375/375 - 15s - loss: 0.3601 - accuracy: 0.8683 - 15s/epoch - 41ms/step
+Epoch 5/15
+375/375 - 16s - loss: 0.3322 - accuracy: 0.8775 - 16s/epoch - 43ms/step
+Epoch 6/15
+375/375 - 15s - loss: 0.3120 - accuracy: 0.8852 - 15s/epoch - 41ms/step
+Epoch 7/15
+375/375 - 15s - loss: 0.2887 - accuracy: 0.8927 - 15s/epoch - 41ms/step
+Epoch 8/15
+375/375 - 15s - loss: 0.2699 - accuracy: 0.8997 - 15s/epoch - 41ms/step
+Epoch 9/15
+375/375 - 15s - loss: 0.2547 - accuracy: 0.9058 - 15s/epoch - 41ms/step
+Epoch 10/15
+375/375 - 15s - loss: 0.2386 - accuracy: 0.9108 - 15s/epoch - 41ms/step
+Epoch 11/15
+375/375 - 15s - loss: 0.2230 - accuracy: 0.9176 - 15s/epoch - 41ms/step
+Epoch 12/15
+375/375 - 15s - loss: 0.2107 - accuracy: 0.9213 - 15s/epoch - 41ms/step
+Epoch 13/15
+375/375 - 15s - loss: 0.1947 - accuracy: 0.9273 - 15s/epoch - 41ms/step
+Epoch 14/15
+375/375 - 15s - loss: 0.1847 - accuracy: 0.9316 - 15s/epoch - 41ms/step
+Epoch 15/15
+375/375 - 15s - loss: 0.1693 - accuracy: 0.9373 - 15s/epoch - 41ms/step
+Score for fold 2: loss of 0.34101352095603943; accuracy of 88.92499804496765%
+------------------------------------------------------------------------
+Training for fold 3 ...
+Epoch 1/15
+375/375 - 16s - loss: 0.7606 - accuracy: 0.7217 - 16s/epoch - 41ms/step
+Epoch 2/15
+375/375 - 15s - loss: 0.5036 - accuracy: 0.8173 - 15s/epoch - 40ms/step
+Epoch 3/15
+375/375 - 15s - loss: 0.4289 - accuracy: 0.8426 - 15s/epoch - 41ms/step
+Epoch 4/15
+375/375 - 16s - loss: 0.3867 - accuracy: 0.8576 - 16s/epoch - 41ms/step
+Epoch 5/15
+375/375 - 16s - loss: 0.3472 - accuracy: 0.8726 - 16s/epoch - 43ms/step
+Epoch 6/15
+375/375 - 15s - loss: 0.3221 - accuracy: 0.8809 - 15s/epoch - 41ms/step
+Epoch 7/15
+375/375 - 15s - loss: 0.2991 - accuracy: 0.8889 - 15s/epoch - 41ms/step
+Epoch 8/15
+375/375 - 15s - loss: 0.2855 - accuracy: 0.8941 - 15s/epoch - 41ms/step
+Epoch 9/15
+375/375 - 15s - loss: 0.2677 - accuracy: 0.9001 - 15s/epoch - 41ms/step
+Epoch 10/15
+375/375 - 15s - loss: 0.2494 - accuracy: 0.9075 - 15s/epoch - 41ms/step
+Epoch 11/15
+375/375 - 15s - loss: 0.2360 - accuracy: 0.9118 - 15s/epoch - 40ms/step
+Epoch 12/15
+375/375 - 15s - loss: 0.2197 - accuracy: 0.9195 - 15s/epoch - 41ms/step
+Epoch 13/15
+375/375 - 15s - loss: 0.2068 - accuracy: 0.9239 - 15s/epoch - 41ms/step
+Epoch 14/15
+375/375 - 15s - loss: 0.1943 - accuracy: 0.9283 - 15s/epoch - 41ms/step
+Epoch 15/15
+375/375 - 15s - loss: 0.1782 - accuracy: 0.9334 - 15s/epoch - 41ms/step
+Score for fold 3: loss of 0.3266170918941498; accuracy of 88.95833492279053%
+------------------------------------------------------------------------
+Training for fold 4 ...
+Epoch 1/15
+375/375 - 16s - loss: 0.7530 - accuracy: 0.7258 - 16s/epoch - 41ms/step
+Epoch 2/15
+375/375 - 15s - loss: 0.4776 - accuracy: 0.8278 - 15s/epoch - 40ms/step
+Epoch 3/15
+375/375 - 15s - loss: 0.4132 - accuracy: 0.8497 - 15s/epoch - 40ms/step
+Epoch 4/15
+375/375 - 15s - loss: 0.3685 - accuracy: 0.8655 - 15s/epoch - 40ms/step
+Epoch 5/15
+375/375 - 15s - loss: 0.3390 - accuracy: 0.8746 - 15s/epoch - 40ms/step
+Epoch 6/15
+375/375 - 15s - loss: 0.3129 - accuracy: 0.8845 - 15s/epoch - 41ms/step
+Epoch 7/15
+375/375 - 15s - loss: 0.2929 - accuracy: 0.8913 - 15s/epoch - 41ms/step
+Epoch 8/15
+375/375 - 15s - loss: 0.2739 - accuracy: 0.8981 - 15s/epoch - 40ms/step
+Epoch 9/15
+375/375 - 15s - loss: 0.2578 - accuracy: 0.9050 - 15s/epoch - 41ms/step
+Epoch 10/15
+375/375 - 15s - loss: 0.2437 - accuracy: 0.9087 - 15s/epoch - 41ms/step
+Epoch 11/15
+375/375 - 15s - loss: 0.2297 - accuracy: 0.9151 - 15s/epoch - 41ms/step
+Epoch 12/15
+375/375 - 15s - loss: 0.2165 - accuracy: 0.9193 - 15s/epoch - 40ms/step
+Epoch 13/15
+375/375 - 15s - loss: 0.1999 - accuracy: 0.9264 - 15s/epoch - 40ms/step
+Epoch 14/15
+375/375 - 15s - loss: 0.1907 - accuracy: 0.9298 - 15s/epoch - 40ms/step
+Epoch 15/15
+375/375 - 15s - loss: 0.1769 - accuracy: 0.9335 - 15s/epoch - 40ms/step
+Score for fold 4: loss of 0.29835543036460876; accuracy of 89.79166746139526%
+------------------------------------------------------------------------
+Training for fold 5 ...
+Epoch 1/15
+375/375 - 16s - loss: 0.7515 - accuracy: 0.7217 - 16s/epoch - 43ms/step
+Epoch 2/15
+375/375 - 16s - loss: 0.4859 - accuracy: 0.8213 - 16s/epoch - 41ms/step
+Epoch 3/15
+375/375 - 15s - loss: 0.4155 - accuracy: 0.8466 - 15s/epoch - 41ms/step
+Epoch 4/15
+375/375 - 16s - loss: 0.3681 - accuracy: 0.8649 - 16s/epoch - 42ms/step
+Epoch 5/15
+375/375 - 16s - loss: 0.3449 - accuracy: 0.8718 - 16s/epoch - 42ms/step
+Epoch 6/15
+375/375 - 16s - loss: 0.3197 - accuracy: 0.8814 - 16s/epoch - 42ms/step
+Epoch 7/15
+375/375 - 16s - loss: 0.2958 - accuracy: 0.8882 - 16s/epoch - 41ms/step
+Epoch 8/15
+375/375 - 16s - loss: 0.2759 - accuracy: 0.8978 - 16s/epoch - 42ms/step
+Epoch 9/15
+375/375 - 16s - loss: 0.2605 - accuracy: 0.9034 - 16s/epoch - 41ms/step
+Epoch 10/15
+375/375 - 16s - loss: 0.2434 - accuracy: 0.9100 - 16s/epoch - 42ms/step
+Epoch 11/15
+375/375 - 16s - loss: 0.2298 - accuracy: 0.9143 - 16s/epoch - 42ms/step
+Epoch 12/15
+375/375 - 16s - loss: 0.2137 - accuracy: 0.9203 - 16s/epoch - 42ms/step
+Epoch 13/15
+375/375 - 16s - loss: 0.2047 - accuracy: 0.9231 - 16s/epoch - 42ms/step
+Epoch 14/15
+375/375 - 16s - loss: 0.1899 - accuracy: 0.9295 - 16s/epoch - 43ms/step
+Epoch 15/15
+375/375 - 16s - loss: 0.1751 - accuracy: 0.9352 - 16s/epoch - 43ms/step
+Score for fold 5: loss of 0.31194356083869934; accuracy of 89.57499861717224%
+------------------------------------------------------------------------
+Score per fold
+------------------------------------------------------------------------
+> Fold 1 - Loss: 0.3071862459182739 - Accuracy: 89.79166746139526%
+------------------------------------------------------------------------
+> Fold 2 - Loss: 0.34101352095603943 - Accuracy: 88.92499804496765%
+------------------------------------------------------------------------
+> Fold 3 - Loss: 0.3266170918941498 - Accuracy: 88.95833492279053%
+------------------------------------------------------------------------
+> Fold 4 - Loss: 0.29835543036460876 - Accuracy: 89.79166746139526%
+------------------------------------------------------------------------
+> Fold 5 - Loss: 0.31194356083869934 - Accuracy: 89.57499861717224%
+------------------------------------------------------------------------
+Average scores for all folds:
+> Accuracy: 89.40833330154419 (+- 0.3893016811629994)
+> Loss: 0.31702316999435426
