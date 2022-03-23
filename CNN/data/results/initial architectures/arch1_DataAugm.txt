@@ -1,0 +1,200 @@
+Training for fold 1 ...
+Epoch 1/15
+2022-03-19 20:20:35.757669: I tensorflow/stream_executor/cuda/cuda_dnn.cc:368] Loaded cuDNN version 8202
+1500/1500 - 15s - loss: 0.5221 - accuracy: 0.8068 - lr: 0.0010 - 15s/epoch - 10ms/step
+Epoch 2/15
+1500/1500 - 9s - loss: 0.3385 - accuracy: 0.8742 - lr: 0.0010 - 9s/epoch - 6ms/step
+Epoch 3/15
+1500/1500 - 7s - loss: 0.2918 - accuracy: 0.8924 - lr: 0.0010 - 7s/epoch - 5ms/step
+Epoch 4/15
+1500/1500 - 7s - loss: 0.2647 - accuracy: 0.9025 - lr: 0.0010 - 7s/epoch - 5ms/step
+Epoch 5/15
+1500/1500 - 7s - loss: 0.2418 - accuracy: 0.9102 - lr: 0.0010 - 7s/epoch - 5ms/step
+Epoch: 5 lr: 0.0010000000474974513
+Epoch 6/15
+1500/1500 - 9s - loss: 0.1966 - accuracy: 0.9262 - lr: 5.0000e-04 - 9s/epoch - 6ms/step
+Epoch 7/15
+1500/1500 - 7s - loss: 0.1832 - accuracy: 0.9313 - lr: 5.0000e-04 - 7s/epoch - 5ms/step
+Epoch 8/15
+1500/1500 - 7s - loss: 0.1693 - accuracy: 0.9367 - lr: 5.0000e-04 - 7s/epoch - 5ms/step
+Epoch 9/15
+1500/1500 - 7s - loss: 0.1598 - accuracy: 0.9395 - lr: 5.0000e-04 - 7s/epoch - 5ms/step
+Epoch 10/15
+1500/1500 - 7s - loss: 0.1501 - accuracy: 0.9434 - lr: 5.0000e-04 - 7s/epoch - 5ms/step
+Epoch: 10 lr: 0.0005000000237487257
+Epoch 11/15
+1500/1500 - 7s - loss: 0.1272 - accuracy: 0.9532 - lr: 2.5000e-04 - 7s/epoch - 5ms/step
+Epoch 12/15
+1500/1500 - 7s - loss: 0.1188 - accuracy: 0.9559 - lr: 2.5000e-04 - 7s/epoch - 4ms/step
+Epoch 13/15
+1500/1500 - 7s - loss: 0.1134 - accuracy: 0.9581 - lr: 2.5000e-04 - 7s/epoch - 5ms/step
+Epoch 14/15
+1500/1500 - 7s - loss: 0.1085 - accuracy: 0.9597 - lr: 2.5000e-04 - 7s/epoch - 5ms/step
+Epoch 15/15
+1500/1500 - 7s - loss: 0.1014 - accuracy: 0.9632 - lr: 2.5000e-04 - 7s/epoch - 5ms/step
+2022-03-19 20:22:29.949738: W tensorflow/core/framework/cpu_allocator_impl.cc:82] Allocation of 37632000 exceeds 10% of free system memory.
+Score for fold 1: loss of 0.2529112994670868; accuracy of 91.8416678905487%
+------------------------------------------------------------------------
+------------------------------------------------------------------------
+Training for fold 2 ...
+Epoch 1/15
+1500/1500 - 8s - loss: 0.5133 - accuracy: 0.8111 - lr: 0.0010 - 8s/epoch - 5ms/step
+Epoch 2/15
+1500/1500 - 7s - loss: 0.3365 - accuracy: 0.8762 - lr: 0.0010 - 7s/epoch - 5ms/step
+Epoch 3/15
+1500/1500 - 7s - loss: 0.2910 - accuracy: 0.8931 - lr: 0.0010 - 7s/epoch - 5ms/step
+Epoch 4/15
+1500/1500 - 7s - loss: 0.2620 - accuracy: 0.9030 - lr: 0.0010 - 7s/epoch - 5ms/step
+Epoch 5/15
+1500/1500 - 7s - loss: 0.2400 - accuracy: 0.9098 - lr: 0.0010 - 7s/epoch - 5ms/step
+Epoch: 5 lr: 0.0010000000474974513
+Epoch 6/15
+1500/1500 - 7s - loss: 0.1988 - accuracy: 0.9266 - lr: 5.0000e-04 - 7s/epoch - 5ms/step
+Epoch 7/15
+1500/1500 - 7s - loss: 0.1827 - accuracy: 0.9315 - lr: 5.0000e-04 - 7s/epoch - 5ms/step
+Epoch 8/15
+1500/1500 - 7s - loss: 0.1694 - accuracy: 0.9363 - lr: 5.0000e-04 - 7s/epoch - 5ms/step
+Epoch 9/15
+1500/1500 - 7s - loss: 0.1610 - accuracy: 0.9399 - lr: 5.0000e-04 - 7s/epoch - 5ms/step
+Epoch 10/15
+1500/1500 - 7s - loss: 0.1508 - accuracy: 0.9434 - lr: 5.0000e-04 - 7s/epoch - 5ms/step
+Epoch: 10 lr: 0.0005000000237487257
+Epoch 11/15
+1500/1500 - 7s - loss: 0.1250 - accuracy: 0.9529 - lr: 2.5000e-04 - 7s/epoch - 5ms/step
+Epoch 12/15
+1500/1500 - 7s - loss: 0.1183 - accuracy: 0.9555 - lr: 2.5000e-04 - 7s/epoch - 5ms/step
+Epoch 13/15
+1500/1500 - 7s - loss: 0.1122 - accuracy: 0.9581 - lr: 2.5000e-04 - 7s/epoch - 5ms/step
+Epoch 14/15
+1500/1500 - 7s - loss: 0.1058 - accuracy: 0.9605 - lr: 2.5000e-04 - 7s/epoch - 5ms/step
+Epoch 15/15
+1500/1500 - 7s - loss: 0.1012 - accuracy: 0.9626 - lr: 2.5000e-04 - 7s/epoch - 5ms/step
+2022-03-19 20:24:19.296469: W tensorflow/core/framework/cpu_allocator_impl.cc:82] Allocation of 37632000 exceeds 10% of free system memory.
+Score for fold 2: loss of 0.2500399053096771; accuracy of 91.8916642665863%
+------------------------------------------------------------------------
+------------------------------------------------------------------------
+Training for fold 3 ...
+Epoch 1/15
+1500/1500 - 8s - loss: 0.5211 - accuracy: 0.8101 - lr: 0.0010 - 8s/epoch - 5ms/step
+Epoch 2/15
+1500/1500 - 7s - loss: 0.3448 - accuracy: 0.8729 - lr: 0.0010 - 7s/epoch - 5ms/step
+Epoch 3/15
+1500/1500 - 7s - loss: 0.2994 - accuracy: 0.8907 - lr: 0.0010 - 7s/epoch - 5ms/step
+Epoch 4/15
+1500/1500 - 7s - loss: 0.2686 - accuracy: 0.9011 - lr: 0.0010 - 7s/epoch - 5ms/step
+Epoch 5/15
+1500/1500 - 8s - loss: 0.2464 - accuracy: 0.9081 - lr: 0.0010 - 8s/epoch - 5ms/step
+Epoch: 5 lr: 0.0010000000474974513
+Epoch 6/15
+1500/1500 - 8s - loss: 0.2040 - accuracy: 0.9247 - lr: 5.0000e-04 - 8s/epoch - 5ms/step
+Epoch 7/15
+1500/1500 - 7s - loss: 0.1902 - accuracy: 0.9294 - lr: 5.0000e-04 - 7s/epoch - 5ms/step
+Epoch 8/15
+1500/1500 - 9s - loss: 0.1803 - accuracy: 0.9326 - lr: 5.0000e-04 - 9s/epoch - 6ms/step
+Epoch 9/15
+1500/1500 - 8s - loss: 0.1678 - accuracy: 0.9370 - lr: 5.0000e-04 - 8s/epoch - 5ms/step
+Epoch 10/15
+1500/1500 - 9s - loss: 0.1570 - accuracy: 0.9411 - lr: 5.0000e-04 - 9s/epoch - 6ms/step
+Epoch: 10 lr: 0.0005000000237487257
+Epoch 11/15
+1500/1500 - 8s - loss: 0.1347 - accuracy: 0.9498 - lr: 2.5000e-04 - 8s/epoch - 5ms/step
+Epoch 12/15
+1500/1500 - 8s - loss: 0.1263 - accuracy: 0.9526 - lr: 2.5000e-04 - 8s/epoch - 5ms/step
+Epoch 13/15
+1500/1500 - 8s - loss: 0.1201 - accuracy: 0.9554 - lr: 2.5000e-04 - 8s/epoch - 5ms/step
+Epoch 14/15
+1500/1500 - 8s - loss: 0.1157 - accuracy: 0.9573 - lr: 2.5000e-04 - 8s/epoch - 5ms/step
+Epoch 15/15
+1500/1500 - 7s - loss: 0.1108 - accuracy: 0.9591 - lr: 2.5000e-04 - 7s/epoch - 5ms/step
+2022-03-19 20:26:18.303329: W tensorflow/core/framework/cpu_allocator_impl.cc:82] Allocation of 37632000 exceeds 10% of free system memory.
+Score for fold 3: loss of 0.23824326694011688; accuracy of 92.29999780654907%
+------------------------------------------------------------------------
+------------------------------------------------------------------------
+Training for fold 4 ...
+Epoch 1/15
+1500/1500 - 8s - loss: 0.5254 - accuracy: 0.8087 - lr: 0.0010 - 8s/epoch - 5ms/step
+Epoch 2/15
+1500/1500 - 8s - loss: 0.3426 - accuracy: 0.8741 - lr: 0.0010 - 8s/epoch - 5ms/step
+Epoch 3/15
+1500/1500 - 7s - loss: 0.2955 - accuracy: 0.8907 - lr: 0.0010 - 7s/epoch - 5ms/step
+Epoch 4/15
+1500/1500 - 7s - loss: 0.2631 - accuracy: 0.9033 - lr: 0.0010 - 7s/epoch - 5ms/step
+Epoch 5/15
+1500/1500 - 7s - loss: 0.2400 - accuracy: 0.9112 - lr: 0.0010 - 7s/epoch - 5ms/step
+Epoch: 5 lr: 0.0010000000474974513
+Epoch 6/15
+1500/1500 - 8s - loss: 0.1958 - accuracy: 0.9264 - lr: 5.0000e-04 - 8s/epoch - 5ms/step
+Epoch 7/15
+1500/1500 - 7s - loss: 0.1846 - accuracy: 0.9310 - lr: 5.0000e-04 - 7s/epoch - 5ms/step
+Epoch 8/15
+1500/1500 - 7s - loss: 0.1699 - accuracy: 0.9365 - lr: 5.0000e-04 - 7s/epoch - 5ms/step
+Epoch 9/15
+1500/1500 - 7s - loss: 0.1616 - accuracy: 0.9391 - lr: 5.0000e-04 - 7s/epoch - 5ms/step
+Epoch 10/15
+1500/1500 - 7s - loss: 0.1504 - accuracy: 0.9432 - lr: 5.0000e-04 - 7s/epoch - 5ms/step
+Epoch: 10 lr: 0.0005000000237487257
+Epoch 11/15
+1500/1500 - 7s - loss: 0.1271 - accuracy: 0.9539 - lr: 2.5000e-04 - 7s/epoch - 5ms/step
+Epoch 12/15
+1500/1500 - 7s - loss: 0.1190 - accuracy: 0.9560 - lr: 2.5000e-04 - 7s/epoch - 5ms/step
+Epoch 13/15
+1500/1500 - 7s - loss: 0.1131 - accuracy: 0.9586 - lr: 2.5000e-04 - 7s/epoch - 5ms/step
+Epoch 14/15
+1500/1500 - 7s - loss: 0.1086 - accuracy: 0.9601 - lr: 2.5000e-04 - 7s/epoch - 5ms/step
+Epoch 15/15
+1500/1500 - 7s - loss: 0.1012 - accuracy: 0.9626 - lr: 2.5000e-04 - 7s/epoch - 5ms/step
+2022-03-19 20:28:08.652828: W tensorflow/core/framework/cpu_allocator_impl.cc:82] Allocation of 37632000 exceeds 10% of free system memory.
+Score for fold 4: loss of 0.24671953916549683; accuracy of 92.03333258628845%
+------------------------------------------------------------------------
+------------------------------------------------------------------------
+Training for fold 5 ...
+Epoch 1/15
+1500/1500 - 8s - loss: 0.5214 - accuracy: 0.8073 - lr: 0.0010 - 8s/epoch - 5ms/step
+Epoch 2/15
+1500/1500 - 7s - loss: 0.3444 - accuracy: 0.8720 - lr: 0.0010 - 7s/epoch - 5ms/step
+Epoch 3/15
+1500/1500 - 8s - loss: 0.2938 - accuracy: 0.8920 - lr: 0.0010 - 8s/epoch - 5ms/step
+Epoch 4/15
+1500/1500 - 8s - loss: 0.2652 - accuracy: 0.9012 - lr: 0.0010 - 8s/epoch - 6ms/step
+Epoch 5/15
+1500/1500 - 7s - loss: 0.2398 - accuracy: 0.9099 - lr: 0.0010 - 7s/epoch - 5ms/step
+Epoch: 5 lr: 0.0010000000474974513
+Epoch 6/15
+1500/1500 - 7s - loss: 0.1990 - accuracy: 0.9261 - lr: 5.0000e-04 - 7s/epoch - 5ms/step
+Epoch 7/15
+1500/1500 - 7s - loss: 0.1844 - accuracy: 0.9316 - lr: 5.0000e-04 - 7s/epoch - 5ms/step
+Epoch 8/15
+1500/1500 - 8s - loss: 0.1716 - accuracy: 0.9368 - lr: 5.0000e-04 - 8s/epoch - 5ms/step
+Epoch 9/15
+1500/1500 - 8s - loss: 0.1609 - accuracy: 0.9407 - lr: 5.0000e-04 - 8s/epoch - 5ms/step
+Epoch 10/15
+1500/1500 - 7s - loss: 0.1496 - accuracy: 0.9435 - lr: 5.0000e-04 - 7s/epoch - 5ms/step
+Epoch: 10 lr: 0.0005000000237487257
+Epoch 11/15
+1500/1500 - 8s - loss: 0.1284 - accuracy: 0.9541 - lr: 2.5000e-04 - 8s/epoch - 5ms/step
+Epoch 12/15
+1500/1500 - 7s - loss: 0.1194 - accuracy: 0.9563 - lr: 2.5000e-04 - 7s/epoch - 5ms/step
+Epoch 13/15
+1500/1500 - 7s - loss: 0.1132 - accuracy: 0.9592 - lr: 2.5000e-04 - 7s/epoch - 5ms/step
+Epoch 14/15
+1500/1500 - 8s - loss: 0.1069 - accuracy: 0.9610 - lr: 2.5000e-04 - 8s/epoch - 5ms/step
+Epoch 15/15
+1500/1500 - 7s - loss: 0.1037 - accuracy: 0.9624 - lr: 2.5000e-04 - 7s/epoch - 5ms/step
+2022-03-19 20:30:02.234963: W tensorflow/core/framework/cpu_allocator_impl.cc:82] Allocation of 37632000 exceeds 10% of free system memory.
+Score for fold 5: loss of 0.23519642651081085; accuracy of 92.35833287239075%
+------------------------------------------------------------------------
+Score per fold
+------------------------------------------------------------------------
+> Fold 1 - Loss: 0.2529112994670868 - Accuracy: 91.8416678905487%
+------------------------------------------------------------------------
+> Fold 2 - Loss: 0.2500399053096771 - Accuracy: 91.8916642665863%
+------------------------------------------------------------------------
+> Fold 3 - Loss: 0.23824326694011688 - Accuracy: 92.29999780654907%
+------------------------------------------------------------------------
+> Fold 4 - Loss: 0.24671953916549683 - Accuracy: 92.03333258628845%
+------------------------------------------------------------------------
+> Fold 5 - Loss: 0.23519642651081085 - Accuracy: 92.35833287239075%
+------------------------------------------------------------------------
+Average scores for all folds:
+> Accuracy: 92.08499908447266 (+- 0.20985407257919317)
+> Loss: 0.2446220874786377
