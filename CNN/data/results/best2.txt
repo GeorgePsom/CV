@@ -1,0 +1,75 @@
+--------------------Adaptive----------------------
+
+Epoch 1/15
+2022-03-23 15:43:26.687237: I tensorflow/stream_executor/cuda/cuda_dnn.cc:368] Loaded cuDNN version 8202
+469/469 - 12s - loss: 0.5731 - accuracy: 0.7905 - lr: 0.0010 - 12s/epoch - 26ms/step
+Epoch 2/15
+469/469 - 5s - loss: 0.3583 - accuracy: 0.8701 - lr: 0.0010 - 5s/epoch - 10ms/step
+Epoch 3/15
+469/469 - 5s - loss: 0.3034 - accuracy: 0.8895 - lr: 0.0010 - 5s/epoch - 10ms/step
+Epoch 4/15
+469/469 - 4s - loss: 0.2667 - accuracy: 0.9016 - lr: 0.0010 - 4s/epoch - 9ms/step
+Epoch 5/15
+469/469 - 4s - loss: 0.2422 - accuracy: 0.9107 - lr: 0.0010 - 4s/epoch - 9ms/step
+Epoch 6/15
+469/469 - 4s - loss: 0.2065 - accuracy: 0.9241 - lr: 5.0000e-04 - 4s/epoch - 10ms/step
+Epoch 7/15
+469/469 - 4s - loss: 0.1935 - accuracy: 0.9289 - lr: 5.0000e-04 - 4s/epoch - 9ms/step
+Epoch 8/15
+469/469 - 4s - loss: 0.1837 - accuracy: 0.9318 - lr: 5.0000e-04 - 4s/epoch - 9ms/step
+Epoch 9/15
+469/469 - 4s - loss: 0.1738 - accuracy: 0.9357 - lr: 5.0000e-04 - 4s/epoch - 9ms/step
+Epoch 10/15
+469/469 - 4s - loss: 0.1626 - accuracy: 0.9406 - lr: 5.0000e-04 - 4s/epoch - 9ms/step
+Epoch 11/15
+469/469 - 4s - loss: 0.1425 - accuracy: 0.9486 - lr: 2.5000e-04 - 4s/epoch - 9ms/step
+Epoch 12/15
+469/469 - 4s - loss: 0.1352 - accuracy: 0.9520 - lr: 2.5000e-04 - 4s/epoch - 9ms/step
+Epoch 13/15
+469/469 - 4s - loss: 0.1303 - accuracy: 0.9533 - lr: 2.5000e-04 - 4s/epoch - 9ms/step
+Epoch 14/15
+469/469 - 4s - loss: 0.1224 - accuracy: 0.9566 - lr: 2.5000e-04 - 4s/epoch - 9ms/step
+Epoch 15/15
+469/469 - 4s - loss: 0.1175 - accuracy: 0.9581 - lr: 2.5000e-04 - 4s/epoch - 9ms/step
+313/313 - 1s - loss: 0.2478 - accuracy: 0.9176 - 1s/epoch - 4ms/step
+Test accuracy: 0.9175999760627747
+Test loss: 0.24783168733119965
+
+--------------------Kernels----------------------
+
+(60000, 28, 28)
+60000
+2022-03-23 15:44:37.715499: W tensorflow/core/framework/cpu_allocator_impl.cc:82] Allocation of 188160000 exceeds 10% of free system memory.
+Epoch 1/15
+469/469 - 5s - loss: 0.6251 - accuracy: 0.7697 - 5s/epoch - 10ms/step
+Epoch 2/15
+469/469 - 4s - loss: 0.3913 - accuracy: 0.8589 - 4s/epoch - 8ms/step
+Epoch 3/15
+469/469 - 4s - loss: 0.3408 - accuracy: 0.8757 - 4s/epoch - 9ms/step
+Epoch 4/15
+469/469 - 4s - loss: 0.3122 - accuracy: 0.8860 - 4s/epoch - 8ms/step
+Epoch 5/15
+469/469 - 4s - loss: 0.2926 - accuracy: 0.8934 - 4s/epoch - 8ms/step
+Epoch 6/15
+469/469 - 4s - loss: 0.2768 - accuracy: 0.8989 - 4s/epoch - 8ms/step
+Epoch 7/15
+469/469 - 4s - loss: 0.2623 - accuracy: 0.9028 - 4s/epoch - 8ms/step
+Epoch 8/15
+469/469 - 4s - loss: 0.2507 - accuracy: 0.9076 - 4s/epoch - 8ms/step
+Epoch 9/15
+469/469 - 4s - loss: 0.2395 - accuracy: 0.9120 - 4s/epoch - 9ms/step
+Epoch 10/15
+469/469 - 4s - loss: 0.2313 - accuracy: 0.9133 - 4s/epoch - 9ms/step
+Epoch 11/15
+469/469 - 4s - loss: 0.2220 - accuracy: 0.9168 - 4s/epoch - 8ms/step
+Epoch 12/15
+469/469 - 4s - loss: 0.2163 - accuracy: 0.9194 - 4s/epoch - 9ms/step
+Epoch 13/15
+469/469 - 4s - loss: 0.2089 - accuracy: 0.9208 - 4s/epoch - 8ms/step
+Epoch 14/15
+469/469 - 4s - loss: 0.2022 - accuracy: 0.9242 - 4s/epoch - 8ms/step
+Epoch 15/15
+469/469 - 4s - loss: 0.1947 - accuracy: 0.9268 - 4s/epoch - 9ms/step
+313/313 - 1s - loss: 0.2350 - accuracy: 0.9129 - 1s/epoch - 4ms/step
+Test accuracy: 0.9128999710083008
+Test loss: 0.2350393384695053
