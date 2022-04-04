@@ -2,7 +2,14 @@ import wget
 import unzip
 #import cv2
 import numpy as np
+from helpfuncs import*
 from sklearn.model_selection import StratifiedShuffleSplit
+import tensorflow as tf
+import sklearn.model_selection as sk_ms
+from tensorflow.keras.models import Sequential
+from tensorflow.keras.layers import Dense, Flatten, Conv2D, MaxPooling2D, Dropout
+from tensorflow.keras.losses import sparse_categorical_crossentropy
+from tensorflow.keras.optimizers import Adam
 
 # url1 = 'http://vision.stanford.edu/Datasets/Stanford40_JPEGImages.zip'
 #
@@ -28,48 +35,31 @@ with open('ImageSplits/test.txt', 'r') as f:
 action_categories = sorted(list(set(['_'.join(name.split('_')[:-1]) for name in train_files])))
 #print(f'Action categories ({len(action_categories)}):\n{action_categories}')
 
-sss = StratifiedShuffleSplit(n_splits=1, test_size=0.1, random_state=0)
-X_train = []
-Y_train  = []
-X_validation  = []
-Y_validation = []
-for train_index, test_index in sss.split(train_files, train_labels):
-    for index in train_index:
-        X_train = np.append(X_train, train_files[index])
-        Y_train = np.append(Y_train, train_labels[index])
+X_train, Y_train, X_validation, Y_validation = stratify_data(train_files, train_labels)
 
-    for index in test_index:
-        X_validation = np.append(X_validation, train_files[index])
-        Y_validation = np.append(Y_validation, train_labels[index])
+stratification_check(Y_train, Y_validation)
 
-print(Y_train.size)
-print(Y_validation.size)
-#print("TRAIN: ",  Y_train)
-#print("VALIDATION: ",  Y_validation)
 
-all_labels = np.unique(Y_train)
-label_counts = {}
+model = Sequential()
+#model.add(Conv2D(32, kernel_size = (3, 3), activation = 'relu', input_shape = (28, 28, 1)))
+model.add(Conv2D(32, kernel_size = (3, 3), activation = 'relu'))
+model.add(MaxPooling2D(pool_size = (2, 2)))
 
-for label in all_labels:
-    label_counts[label]=[0,0]
+model.add(Conv2D(64, kernel_size = (3, 3), activation = 'relu'))
+model.add(MaxPooling2D(pool_size = (2, 2)))
+model.add(Flatten())
+model.add(Dense(128, activation = 'relu'))
+model.add(Dense(64, activation = 'relu'))
+model.add(Dense(10))
 
-for lab_train in Y_train:
-    label_counts[lab_train][0] += 1
+model.compile(optimizer = Adam(), loss = tf.keras.losses.SparseCategoricalCrossentropy(from_logits= True), metrics = ['accuracy'], )
+history = model.fit(X_train, Y_train, batch_size = 128, epochs = 15, verbose = 2)
 
-for lab_validate in Y_validation:
-    label_counts[lab_validate][1] += 1
-
-print("Label counts: ",  label_counts)
-
-for label in label_counts.keys():
-    label_counts[label][0] /= Y_train.size
-    label_counts[label][1] /= Y_validation.size
-
-print("Labels avg: ",  label_counts)
+#scores = model.evaluate(test_files, test_labels, verbose = 2)
 
 
 
- # y_train, y_test = train_labels[train_index], train_labels[test_index]
+
 
 # image_no = 3999  # change this to a number between [0, 3999] and you can see a different training image
 # img = cv2.imread(f'JPEGImages/{train_files[image_no]}')
