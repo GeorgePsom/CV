@@ -1,6 +1,6 @@
 import wget
 import unzip
-import cv2
+#import cv2
 import numpy as np
 from sklearn.model_selection import StratifiedShuffleSplit
 
@@ -44,8 +44,29 @@ for train_index, test_index in sss.split(train_files, train_labels):
 
 print(Y_train.size)
 print(Y_validation.size)
-print("TRAIN: ",  Y_train)
-print("VALIDATION: ",  Y_validation)
+#print("TRAIN: ",  Y_train)
+#print("VALIDATION: ",  Y_validation)
+
+all_labels = np.unique(Y_train)
+label_counts = {}
+
+for label in all_labels:
+    label_counts[label]=[0,0]
+
+for lab_train in Y_train:
+    label_counts[lab_train][0] += 1
+
+for lab_validate in Y_validation:
+    label_counts[lab_validate][1] += 1
+
+print("Label counts: ",  label_counts)
+
+for label in label_counts.keys():
+    label_counts[label][0] /= Y_train.size
+    label_counts[label][1] /= Y_validation.size
+
+print("Labels avg: ",  label_counts)
+
 
 
  # y_train, y_test = train_labels[train_index], train_labels[test_index]
@@ -56,4 +77,4 @@ print("VALIDATION: ",  Y_validation)
 # print(f'An image with the label - {train_labels[image_no]}')
 
 print('Hello')
-cv2.waitKey(0)
+#cv2.waitKey(0)
