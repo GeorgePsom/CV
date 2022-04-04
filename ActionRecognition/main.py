@@ -13,6 +13,7 @@ from tensorflow.keras.layers import Dense, Flatten, Conv2D, MaxPooling2D, Dropou
 from tensorflow.keras.losses import sparse_categorical_crossentropy
 from tensorflow.keras.optimizers import Adam
 from PIL import Image
+from sklearn import utils
 
 # url1 = 'http://vision.stanford.edu/Datasets/Stanford40_JPEGImages.zip'
 #
@@ -38,6 +39,10 @@ with open('ImageSplits/test.txt', 'r') as f:
 action_categories = sorted(list(set(['_'.join(name.split('_')[:-1]) for name in train_files])))
 print(action_categories)
 
+train_files, train_labels = utils.shuffle(train_files, train_labels)
+
+
+
 categ_dict = {}
 i=0
 
@@ -52,9 +57,9 @@ for i in range(0,len(test_labels)):
     test_labels[i] = categ_dict[test_labels[i]]
 
 
-X_train, Y_train, X_validation, Y_validation = stratify_data(train_files, train_labels)
+#X_train, Y_train, X_validation, Y_validation = stratify_data(train_files, train_labels)
 
-stratification_check(Y_train, Y_validation)
+#stratification_check(Y_train, Y_validation)
 
 
 IMAGE_SIZE = 112
@@ -87,33 +92,32 @@ def tf_resize_images(X_img_file_paths):
     X_data = np.array(X_data, dtype = np.float32) # Convert to numpy
     return X_data
 
-X_train_images = tf_resize_images(X_train)
+#X_train_imagessss = tf_resize_images(X_train)
 
-X_validation_images = tf_resize_images(X_validation)
+#X_validation_images = tf_resize_images(X_validation)
 
-#X_train_images = tf_resize_images(train_files)
+X_train_images = tf_resize_images(train_files)
 
-#X_test_images = tf_resize_images(test_files)
+X_test_images = tf_resize_images(test_files)
 
 
 model = Sequential()
 #model.add(Conv2D(32, kernel_size = (3, 3), activation = 'relu', input_shape = (28, 28, 1)))
-model.add(Conv2D(32, kernel_size = (3, 3), activation = 'relu'))
+model.add(Conv2D(32, kernel_size = (5, 5), activation = 'relu'))
 model.add(MaxPooling2D(pool_size = (2, 2)))
-
-model.add(Conv2D(64, kernel_size = (3, 3), activation = 'relu'))
-model.add(MaxPooling2D(pool_size = (2, 2)))
+model.add(Conv2D(64, kernel_size = (5, 5), activation = 'relu'))
+model.add(MaxPooling2D(pool_size = (2, 2))) 
 model.add(Flatten())
 model.add(Dense(128, activation = 'relu'))
 model.add(Dense(64, activation = 'relu'))
 model.add(Dense(40))
 
 model.compile(optimizer = Adam(), loss = tf.keras.losses.SparseCategoricalCrossentropy(from_logits= True), metrics = ['accuracy'], )
-#history = model.fit(X_train_images, train_labels, batch_size = 128, epochs = 15, verbose = 2)
-history = model.fit(X_train_images, Y_train, batch_size = 128, epochs = 15, verbose = 2)
+history = model.fit(X_train_images, np.array(train_labels), batch_size = 128, epochs = 15, verbose = 2)
+#history = model.fit(X_train_images, Y_train, batch_size = 128, epochs = 15, verbose = 2)
 
-#scores = model.evaluate(X_test_images, test_labels, verbose = 2)
-scores = model.evaluate(X_validation_images, Y_validation, verbose = 2)
+scores = model.evaluate(X_test_images, np.array(test_labels), verbose = 2)
+#scores = model.evaluate(X_validation_images, Y_validation, verbose = 2)
 
 print(f'Score for fold: {model.metrics_names[0]} of {scores[0]}; {model.metrics_names[1]} of {scores[1]*100}%')
 
