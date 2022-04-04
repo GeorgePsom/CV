@@ -20,6 +20,8 @@ eggs/
 lib/
 lib64/
 parts/
+ImageSplits/
+JPEGImages/
 sdist/
 var/
 *.egg-info/
