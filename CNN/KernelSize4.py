@@ -45,6 +45,7 @@ for train, test in kfold.split(train_images, train_labels):
     model.add(Dense(10))
 
     model.compile(optimizer = Adam(), loss = tf.keras.losses.SparseCategoricalCrossentropy(from_logits= True), metrics = ['accuracy'], )
+    model.summary()
     print('------------------------------------------------------------------------')
     print(f'Training for fold {fold_no} ...')
     history = model.fit(train_images[train], train_labels[train], batch_size = 128, epochs = 15, verbose = 2, validation_data = (train_images[test],train_labels[test]))

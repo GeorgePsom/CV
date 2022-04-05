@@ -59,9 +59,9 @@ for i in range(0,len(test_labels)):
     test_labels[i] = categ_dict[test_labels[i]]
 
 
-#X_train, Y_train, X_validation, Y_validation = stratify_data(train_files, train_labels)
+X_train, Y_train, X_validation, Y_validation = stratify_data(train_files, train_labels)
 
-#stratification_check(Y_train, Y_validation)
+stratification_check(Y_train, Y_validation)
 
 
 IMAGE_SIZE = 112
@@ -94,9 +94,9 @@ def tf_resize_images(X_img_file_paths):
     X_data = np.array(X_data, dtype = np.float32) # Convert to numpy
     return X_data
 
-#X_train_imagessss = tf_resize_images(X_train)
+X_train_imagessss = tf_resize_images(X_train)
 
-#X_validation_images = tf_resize_images(X_validation)
+X_validation_images = tf_resize_images(X_validation)
 
 X_train_images = tf_resize_images(train_files)
 
@@ -111,17 +111,17 @@ def res_identity(x, filters):
   f1, f2 = filters
 
   #first block
-  x = Conv2D(f1, kernel_size=(1, 1), strides=(1, 1), padding='valid', kernel_regularizer=keras.regularizers.l2(0.001))(x)
+  x = Conv2D(f1, kernel_size=(1, 1), strides=(1, 1), padding='valid', kernel_regularizer=keras.regularizers.l2(0.01))(x)
   x = BatchNormalization()(x)
   x = Activation(relu)(x)
 
   #second block # bottleneck (but size kept same with padding)
-  x = Conv2D(f1, kernel_size=(3, 3), strides=(1, 1), padding='same', kernel_regularizer=keras.regularizers.l2(0.001))(x)
+  x = Conv2D(f1, kernel_size=(3, 3), strides=(1, 1), padding='same', kernel_regularizer=keras.regularizers.l2(0.01))(x)
   x = BatchNormalization()(x)
   x = Activation(relu)(x)
 
   # third block activation used after adding the input
-  x = Conv2D(f2, kernel_size=(1, 1), strides=(1, 1), padding='valid', kernel_regularizer=keras.regularizers.l2(0.001))(x)
+  x = Conv2D(f2, kernel_size=(1, 1), strides=(1, 1), padding='valid', kernel_regularizer=keras.regularizers.l2(0.01))(x)
   x = BatchNormalization()(x)
   # x = Activation(activations.relu)(x)
 
@@ -141,17 +141,17 @@ def res_identity(x, filters):
   f1, f2 = filters
 
   #first block
-  x = Conv2D(f1, kernel_size=(1, 1), strides=(1, 1), padding='valid', kernel_regularizer=keras.regularizers.l2(0.001))(x)
+  x = Conv2D(f1, kernel_size=(1, 1), strides=(1, 1), padding='valid', kernel_regularizer=keras.regularizers.l2(0.01))(x)
   x = BatchNormalization()(x)
   x = Activation(relu)(x)
 
   #second block # bottleneck (but size kept same with padding)
-  x = Conv2D(f1, kernel_size=(3, 3), strides=(1, 1), padding='same', kernel_regularizer=keras.regularizers.l2(0.001))(x)
+  x = Conv2D(f1, kernel_size=(3, 3), strides=(1, 1), padding='same', kernel_regularizer=keras.regularizers.l2(0.01))(x)
   x = BatchNormalization()(x)
   x = Activation(relu)(x)
 
   # third block activation used after adding the input
-  x = Conv2D(f2, kernel_size=(1, 1), strides=(1, 1), padding='valid', kernel_regularizer=keras.regularizers.l2(0.001))(x)
+  x = Conv2D(f2, kernel_size=(1, 1), strides=(1, 1), padding='valid', kernel_regularizer=keras.regularizers.l2(0.01))(x)
   x = BatchNormalization()(x)
   # x = Activation(activations.relu)(x)
 
@@ -171,22 +171,22 @@ def res_conv(x, s, filters):
   f1, f2 = filters
 
   # first block
-  x = Conv2D(f1, kernel_size=(1, 1), strides=(s, s), padding='valid', kernel_regularizer=keras.regularizers.l2(0.001))(x)
+  x = Conv2D(f1, kernel_size=(1, 1), strides=(s, s), padding='valid', kernel_regularizer=keras.regularizers.l2(0.01))(x)
   # when s = 2 then it is like downsizing the feature map
   x = BatchNormalization()(x)
   x = Activation(relu)(x)
 
   # second block
-  x = Conv2D(f1, kernel_size=(3, 3), strides=(1, 1), padding='same', kernel_regularizer=keras.regularizers.l2(0.001))(x)
+  x = Conv2D(f1, kernel_size=(3, 3), strides=(1, 1), padding='same', kernel_regularizer=keras.regularizers.l2(0.01))(x)
   x = BatchNormalization()(x)
   x = Activation(relu)(x)
 
   #third block
-  x = Conv2D(f2, kernel_size=(1, 1), strides=(1, 1), padding='valid', kernel_regularizer=keras.regularizers.l2(0.001))(x)
+  x = Conv2D(f2, kernel_size=(1, 1), strides=(1, 1), padding='valid', kernel_regularizer=keras.regularizers.l2(0.01))(x)
   x = BatchNormalization()(x)
 
   # shortcut
-  x_skip = Conv2D(f2, kernel_size=(1, 1), strides=(s, s), padding='valid', kernel_regularizer=keras.regularizers.l2(0.001))(x_skip)
+  x_skip = Conv2D(f2, kernel_size=(1, 1), strides=(s, s), padding='valid', kernel_regularizer=keras.regularizers.l2(0.01))(x_skip)
   x_skip = BatchNormalization()(x_skip)
 
   # add
@@ -199,7 +199,7 @@ def res_conv(x, s, filters):
 ### Combine the above functions to build 50 layers resnet.
 def resnet50(train_im):
 
-  input_im = Input(shape=(train_im.shape[1], train_im.shape[2], train_im.shape[3])) # cifar 10 images size
+  input_im = Input(shape=(train_im.shape[1], train_im.shape[2], train_im.shape[3]))
   x = ZeroPadding2D(padding=(3, 3))(input_im)
 
   # 1st stage
@@ -213,37 +213,39 @@ def resnet50(train_im):
   #2nd stage
   # frm here on only conv block and identity block, no pooling
 
-  x = res_conv(x, s=1, filters=(64, 256))
-  x = res_identity(x, filters=(64, 256))
-  x = res_identity(x, filters=(64, 256))
+  x = res_conv(x, s=1, filters=(64, 128))
+  x = res_identity(x, filters=(64, 128))
+  x = res_identity(x, filters=(64, 128))
 
-  # 3rd stage
-
-  x = res_conv(x, s=2, filters=(128, 512))
-  x = res_identity(x, filters=(128, 512))
-  x = res_identity(x, filters=(128, 512))
-  x = res_identity(x, filters=(128, 512))
-
-  # 4th stage
-
-  x = res_conv(x, s=2, filters=(256, 1024))
-  x = res_identity(x, filters=(256, 1024))
-  x = res_identity(x, filters=(256, 1024))
-  x = res_identity(x, filters=(256, 1024))
-  x = res_identity(x, filters=(256, 1024))
-  x = res_identity(x, filters=(256, 1024))
-
-  # 5th stage
-
-  x = res_conv(x, s=2, filters=(512, 2048))
-  x = res_identity(x, filters=(512, 2048))
-  x = res_identity(x, filters=(512, 2048))
+  # # 3rd stage
+  #
+  # x = res_conv(x, s=2, filters=(32, 64))
+  # x = res_identity(x, filters=(32, 64))
+  # x = res_identity(x, filters=(32, 64))
+  # x = res_identity(x, filters=(32, 64))
+  #
+  # # 4th stage
+  #
+  # x = res_conv(x, s=2, filters=(64, 128))
+  # x = res_identity(x, filters=(64, 128))
+  # x = res_identity(x, filters=(64, 128))
+  # x = res_identity(x, filters=(64, 128))
+  # x = res_identity(x, filters=(64, 128))
+  # x = res_identity(x, filters=(64, 128))
+  # #
+  # # 5th stage
+  #
+  # x = res_conv(x, s=2, filters=(128, 256))
+  # x = res_identity(x, filters=(128, 256))
+  # x = res_identity(x, filters=(128, 256))
 
   # ends with average pooling and dense connection
 
   x = AveragePooling2D((2, 2), padding='same')(x)
 
   x = Flatten()(x)
+  x = Dense(256, activation= 'relu', kernel_regularizer=keras.regularizers.l2(0.01))(x)
+  x = Dense(512, activation= 'relu', kernel_regularizer=keras.regularizers.l2(0.01))(x)
   x = Dense(40, kernel_initializer='he_normal')(x) #multi-class
 
   # define the model
@@ -254,9 +256,11 @@ def resnet50(train_im):
 
 
 
-resnet50_model = resnet50(X_train_images)
+resnet50_model = resnet50(X_train_imagessss)
+
 resnet50_model.compile(loss=tf.keras.losses.SparseCategoricalCrossentropy(from_logits= True), optimizer=Adam(learning_rate=1e-3),
                        metrics=['acc'])
+resnet50_model.summary()
 # model = Sequential()
 # #model.add(Conv2D(32, kernel_size = (3, 3), activation = 'relu', input_shape = (28, 28, 1)))
 # model.add(Conv2D(32, kernel_size = (5, 5), activation = 'relu'))
@@ -273,10 +277,10 @@ resnet50_model.compile(loss=tf.keras.losses.SparseCategoricalCrossentropy(from_l
 
 def lrdecay(epoch):
     lr = 1e-3
-    if epoch > 180:
-        lr *= 0.5e-3
-    elif epoch > 160:
-        lr *= 1e-3
+    if epoch > 10:
+        lr *= 0.25
+    elif epoch > 5:
+        lr *= 0.5
     elif epoch > 120:
         lr *= 1e-2
     elif epoch > 80:
@@ -291,10 +295,10 @@ lrdecay = tf.keras.callbacks.LearningRateScheduler(lrdecay) # learning rate deca
 
 
 
-history = resnet50_model.fit(X_train_images, np.array(train_labels), batch_size = 128, epochs = 15, verbose = 1)
+history = resnet50_model.fit(X_train_imagessss, Y_train, batch_size = 64, epochs = 15, verbose = 1, callbacks=[lrdecay])
 #history = model.fit(X_train_images, Y_train, batch_size = 128, epochs = 15, verbose = 2)
 
-scores = resnet50_model.evaluate(X_test_images, np.array(test_labels), verbose = 2)
+scores = resnet50_model.evaluate(X_validation_images, Y_validation, verbose = 2)
 #scores = model.evaluate(X_validation_images, Y_validation, verbose = 2)
 
 print(f'Score for fold: {resnet50_model.metrics_names[0]} of {scores[0]}; {resnet50_model.metrics_names[1]} of {scores[1]*100}%')
