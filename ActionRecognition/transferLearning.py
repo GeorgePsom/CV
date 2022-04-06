@@ -119,3 +119,5 @@ scores = new_model.evaluate(np.array(X_test_images), test_labels, verbose = 2)
 
 print(f'Score for fold: {new_model.metrics_names[0]} of {scores[0]}; {new_model.metrics_names[1]} of {scores[1]*100}%')
 
+#new_model.save("transferModel")
+

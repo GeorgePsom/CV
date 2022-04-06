@@ -37,12 +37,8 @@ for c in range(len(action_categories)):
     for i in set_1_indices[c]:
         test_files.append([f'TV-HI/test/{action_categories[c]}_{i:04d}-' + str(j + 1) + '.png' for j in indices])
 
-#for j in range(0,16):
-#    test_files.append([f'TV-HI/test/{action_categories[c]}_{i:04d}-'+str(j+1)+'.png' for c in range(len(action_categories)) for i in set_1_indices[c]])
-#test_files1 = [f'TV-HI/test/{action_categories[c]}_{i:04d}-8.png' for c in range(len(action_categories)) for i in set_1_indices[c]]
 test_labels = [f'{action_categories[c]}' for c in range(len(action_categories)) for i in set_1_indices[c]]
 
-#test_files2 = [f'TV-HI/test/{action_categories[c]}_{i:04d}-8.png' for c in range(len(action_categories)) for i in set_1_indices[c]]
 
 # training set
 train_files = []
@@ -51,12 +47,8 @@ for c in range(len(action_categories)):
     for i in set_2_indices[c]:
         train_files.append([f'TV-HI/train/{action_categories[c]}_{i:04d}-' + str(j + 1) + '.png' for j in indices])
 
-#for j in range(0,16):
-#    train_files.append([f'TV-HI/train/{action_categories[c]}_{i:04d}-'+str(j+1)+'.png' for c in range(len(action_categories)) for i in set_2_indices[c]])
-#train_files1 = [f'TV-HI/train/{action_categories[c]}_{i:04d}-8.png' for c in range(len(action_categories)) for i in set_2_indices[c]]
-train_labels = [f'{action_categories[c]}' for c in range(len(action_categories)) for i in set_2_indices[c]]
 
-#train_files2 = [f'TV-HI/train/{action_categories[c]}_{i:04d}-10.png' for c in range(len(action_categories)) for i in set_2_indices[c]]
+train_labels = [f'{action_categories[c]}' for c in range(len(action_categories)) for i in set_2_indices[c]]
 
 print(action_categories)
 
@@ -76,11 +68,6 @@ for i in range(0,len(train_labels)):
 
 for i in range(0,len(test_labels)):
     test_labels[i] = categ_dict[test_labels[i]]
-
-
-#X_train, Y_train, X_validation, Y_validation = stratify_data(train_files, train_labels)
-
-#stratification_check(Y_train, Y_validation)
 
 
 IMAGE_SIZE = 100
@@ -113,9 +100,7 @@ def tf_resize_images(X_img_file_paths):
     X_data = np.array(X_data, dtype = np.float32) # Convert to numpy
     return X_data
 
-#X_train_images = tf_resize_images(X_train)
 
-#X_validation_images = tf_resize_images(X_validation)
 
 X_train_imagesR = []
 X_test_imagesR = []
@@ -124,11 +109,7 @@ for i in range(0,len(train_files)):
     X_train_imagesR.append(tf_resize_images(train_files[i]))
     X_test_imagesR.append(tf_resize_images(test_files[i]))
 
-#X_train_images1 = tf_resize_images(train_files1)
-#X_train_images2 = tf_resize_images(train_files2)
 
-#X_train_images = np.stack((X_train_images1, X_train_images2))
-#X_train_images = np.array([])
 X_train_images = []
 
 for i in range(0, len(X_train_imagesR)):
@@ -136,14 +117,8 @@ for i in range(0, len(X_train_imagesR)):
 
     X_train_images.append(np.stack(arrays))
 
-    #array1 = np.array(X_train_images1[i])
-    #array2 = np.array(X_train_images2[i])
-    #X_train_images.append(np.stack((array1, array2)))
 
 X_train_images = np.array(X_train_images)
-
-#X_test_images1 = tf_resize_images(test_files1)
-#X_test_images2 = tf_resize_images(test_files2)
 
 X_test_images = []
 
@@ -151,10 +126,6 @@ for i in range(0, len(X_test_imagesR)):
     arrays = [np.array(array) for array in X_test_imagesR[i]]
 
     X_test_images.append(np.stack(arrays))
-
-    #array1 = np.array(X_test_images1[i])
-    #array2 = np.array(X_test_images2[i])
-    #X_test_images.append(np.stack((array1, array2)))
 
 X_test_images = np.array(X_test_images)
 
@@ -194,3 +165,5 @@ print("Test loss: ", scores[0])
 #clip=VideoFileClip(f'TV-HI/tv_human_interactions_videos/{set_2[video_no]}')
 #print(f'\n\nA video with the label - {set_2_label[video_no]}\n')
 #clip.ipython_display(width=380)
+
+#model.save("optFlow")
