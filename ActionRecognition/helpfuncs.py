@@ -1,5 +1,8 @@
 import numpy as np
 from sklearn.model_selection import StratifiedShuffleSplit
+import tensorflow.compat.v1 as tf
+tf.disable_v2_behavior()
+from PIL import Image
 
 
 def stratify_data(train_files, train_labels):
@@ -42,3 +45,30 @@ def stratification_check(Y_train, Y_validation):
         label_counts[label][1] /= Y_validation.size
 
     print("Labels avg: ", label_counts)
+
+def tf_resize_images(X_img_file_paths, image_size, channels):
+    X_data = []
+    tf.compat.v1.reset_default_graph()
+    X = tf.placeholder(tf.float32, (None, None, channels))
+    tf_img = tf.image.resize_images(X, (image_size, image_size),
+                                    tf.image.ResizeMethod.NEAREST_NEIGHBOR)
+    with tf.Session() as sess:
+        sess.run(tf.global_variables_initializer())
+
+        # Each image is resized individually as different image may be of different size.
+        for index, file_path in enumerate(X_img_file_paths):
+            #print(file_path)
+            img = Image.open(file_path)
+            #print(np.shape(np.shape(img)))
+            if len(np.shape(img))!=3:
+                img2 = np.zeros((np.shape(img)[0],np.shape(img)[1],3))
+                img2[:, :, 0] = img
+                img2[:, :, 1] = img
+                img2[:, :, 2] = img
+                resized_img = sess.run(tf_img, feed_dict={X: img2})
+            else:
+                resized_img = sess.run(tf_img, feed_dict = {X: img})
+            X_data.append(resized_img)
+
+    X_data = np.array(X_data, dtype = np.float32) # Convert to numpy
+    return X_data

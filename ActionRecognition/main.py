@@ -295,10 +295,10 @@ lrdecay = tf.keras.callbacks.LearningRateScheduler(lrdecay) # learning rate deca
 
 
 
-history = resnet50_model.fit(X_train_imagessss, Y_train, batch_size = 64, epochs = 15, verbose = 1, callbacks=[lrdecay])
+history = resnet50_model.fit(X_train_images, train_labels, batch_size = 64, epochs = 15, verbose = 1, callbacks=[lrdecay])
 #history = model.fit(X_train_images, Y_train, batch_size = 128, epochs = 15, verbose = 2)
 
-scores = resnet50_model.evaluate(X_validation_images, Y_validation, verbose = 2)
+scores = resnet50_model.evaluate(X_test_images, test_labels, verbose = 2)
 #scores = model.evaluate(X_validation_images, Y_validation, verbose = 2)
 
 print(f'Score for fold: {resnet50_model.metrics_names[0]} of {scores[0]}; {resnet50_model.metrics_names[1]} of {scores[1]*100}%')
