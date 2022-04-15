@@ -16,6 +16,7 @@ from tensorflow.keras.optimizers import Adam
 from tensorflow.keras.activations import relu
 from PIL import Image
 from sklearn import utils
+from tensorflow.keras.preprocessing.image import ImageDataGenerator
 
 # url1 = 'http://vision.stanford.edu/Datasets/Stanford40_JPEGImages.zip'
 #
@@ -98,9 +99,20 @@ X_train_imagessss = tf_resize_images(X_train)
 
 X_validation_images = tf_resize_images(X_validation)
 
-X_train_images = tf_resize_images(train_files)
+X_train_images = np.array(tf_resize_images(train_files))
 
-X_test_images = tf_resize_images(test_files)
+X_test_images = np.array(tf_resize_images(test_files))
+
+datagen = ImageDataGenerator(height_shift_range=0.1, width_shift_range=0.1)
+#datagen = ImageDataGenerator(width_shift_range=0.1, height_shift_range=0.1, rotation_range = 0.1)
+# (rotation_range = 10, horizontal_flip = True, zoom_range = 0.1)
+# rotation_range = 10, fill_mode = 'nearest'
+
+train_imagesAug = X_train_images.reshape(X_train_images.shape[0], 112, 112, 3)
+
+# create iterator
+it = datagen.flow(train_imagesAug, train_labels)
+
 
 def res_identity(x, filters):
   #renet block where dimension doesnot change.
@@ -276,7 +288,7 @@ resnet50_model.summary()
 
 
 def lrdecay(epoch):
-    lr = 1e-3
+    lr = 1e-4
     if epoch > 10:
         lr *= 0.25
     elif epoch > 5:
@@ -293,9 +305,11 @@ def lrdecay(epoch):
   #   return 0.01 * np.math.exp(0.03 * (40 - epoch))
 lrdecay = tf.keras.callbacks.LearningRateScheduler(lrdecay) # learning rate decay
 
+# 15 epochs: 20%
 
-
-history = resnet50_model.fit(X_train_images, train_labels, batch_size = 64, epochs = 15, verbose = 1, callbacks=[lrdecay])
+#history = resnet50_model.fit(it, batch_size = 64, epochs = 15, verbose = 1, callbacks=[lrdecay])
+history = resnet50_model.fit(it, epochs = 30, verbose = 1, callbacks=[lrdecay])
+#history = resnet50_model.fit(X_train_images, train_labels, epochs = 20, verbose = 1, callbacks=[lrdecay], validation_data = (X_test_images, test_labels))
 #history = model.fit(X_train_images, Y_train, batch_size = 128, epochs = 15, verbose = 2)
 
 scores = resnet50_model.evaluate(X_test_images, test_labels, verbose = 2)
