@@ -115,143 +115,86 @@ it = datagen.flow(train_imagesAug, train_labels)
 
 
 def res_identity(x, filters):
-  #renet block where dimension doesnot change.
-  #The skip connection is just simple identity conncection
-  #we will have 3 blocks and then input will be added
-
-  x_skip = x # this will be used for addition with the residual block
-  f1, f2 = filters
-
-  #first block
-  x = Conv2D(f1, kernel_size=(1, 1), strides=(1, 1), padding='valid', kernel_regularizer=keras.regularizers.l2(0.01))(x)
-  x = BatchNormalization()(x)
-  x = Activation(relu)(x)
-
-  #second block # bottleneck (but size kept same with padding)
-  x = Conv2D(f1, kernel_size=(3, 3), strides=(1, 1), padding='same', kernel_regularizer=keras.regularizers.l2(0.01))(x)
-  x = BatchNormalization()(x)
-  x = Activation(relu)(x)
-
-  # third block activation used after adding the input
-  x = Conv2D(f2, kernel_size=(1, 1), strides=(1, 1), padding='valid', kernel_regularizer=keras.regularizers.l2(0.01))(x)
-  x = BatchNormalization()(x)
-  # x = Activation(activations.relu)(x)
-
-  # add the input
-  x = Add()([x, x_skip])
-  x = Activation(relu)(x)
-
-  return x
 
 
-def res_identity(x, filters):
-  ''' renet block where dimension doesnot change.
-  The skip connection is just simple identity conncection
-  we will have 3 blocks and then input will be added
-  '''
-  x_skip = x # this will be used for addition with the residual block
-  f1, f2 = filters
-
-  #first block
-  x = Conv2D(f1, kernel_size=(1, 1), strides=(1, 1), padding='valid', kernel_regularizer=keras.regularizers.l2(0.01))(x)
-  x = BatchNormalization()(x)
-  x = Activation(relu)(x)
-
-  #second block # bottleneck (but size kept same with padding)
-  x = Conv2D(f1, kernel_size=(3, 3), strides=(1, 1), padding='same', kernel_regularizer=keras.regularizers.l2(0.01))(x)
-  x = BatchNormalization()(x)
-  x = Activation(relu)(x)
-
-  # third block activation used after adding the input
-  x = Conv2D(f2, kernel_size=(1, 1), strides=(1, 1), padding='valid', kernel_regularizer=keras.regularizers.l2(0.01))(x)
-  x = BatchNormalization()(x)
-  # x = Activation(activations.relu)(x)
-
-  # add the input
-  x = Add()([x, x_skip])
-  x = Activation(relu)(x)
-
-  return x
-
-
-def res_conv(x, s, filters):
-  '''
-  here the input size changes, when it goes via conv blocks
-  so the skip connection uses a projection (conv layer) matrix
-  '''
   x_skip = x
   f1, f2 = filters
 
-  # first block
-  x = Conv2D(f1, kernel_size=(1, 1), strides=(s, s), padding='valid', kernel_regularizer=keras.regularizers.l2(0.01))(x)
-  # when s = 2 then it is like downsizing the feature map
+
+  x = Conv2D(f1, kernel_size=(1, 1), strides=(1, 1), padding='valid', kernel_regularizer=keras.regularizers.l2(0.01))(x)
   x = BatchNormalization()(x)
   x = Activation(relu)(x)
 
-  # second block
+
   x = Conv2D(f1, kernel_size=(3, 3), strides=(1, 1), padding='same', kernel_regularizer=keras.regularizers.l2(0.01))(x)
   x = BatchNormalization()(x)
   x = Activation(relu)(x)
 
-  #third block
+
   x = Conv2D(f2, kernel_size=(1, 1), strides=(1, 1), padding='valid', kernel_regularizer=keras.regularizers.l2(0.01))(x)
   x = BatchNormalization()(x)
 
-  # shortcut
-  x_skip = Conv2D(f2, kernel_size=(1, 1), strides=(s, s), padding='valid', kernel_regularizer=keras.regularizers.l2(0.01))(x_skip)
-  x_skip = BatchNormalization()(x_skip)
 
-  # add
+
   x = Add()([x, x_skip])
   x = Activation(relu)(x)
 
   return x
 
 
-### Combine the above functions to build 50 layers resnet.
-def resnet50(train_im):
+
+
+def res_conv(x, s, filters):
+
+  x_skip = x
+  f1, f2 = filters
+
+
+  x = Conv2D(f1, kernel_size=(1, 1), strides=(s, s), padding='valid', kernel_regularizer=keras.regularizers.l2(0.01))(x)
+
+  x = BatchNormalization()(x)
+  x = Activation(relu)(x)
+
+
+  x = Conv2D(f1, kernel_size=(3, 3), strides=(1, 1), padding='same', kernel_regularizer=keras.regularizers.l2(0.01))(x)
+  x = BatchNormalization()(x)
+  x = Activation(relu)(x)
+
+
+  x = Conv2D(f2, kernel_size=(1, 1), strides=(1, 1), padding='valid', kernel_regularizer=keras.regularizers.l2(0.01))(x)
+  x = BatchNormalization()(x)
+
+
+  x_skip = Conv2D(f2, kernel_size=(1, 1), strides=(s, s), padding='valid', kernel_regularizer=keras.regularizers.l2(0.01))(x_skip)
+  x_skip = BatchNormalization()(x_skip)
+
+
+  x = Add()([x, x_skip])
+  x = Activation(relu)(x)
+
+  return x
+
+
+
+def resnet(train_im):
 
   input_im = Input(shape=(train_im.shape[1], train_im.shape[2], train_im.shape[3]))
   x = ZeroPadding2D(padding=(3, 3))(input_im)
 
-  # 1st stage
-  # here we perform maxpooling, see the figure above
+
 
   x = Conv2D(64, kernel_size=(7, 7), strides=(2, 2))(x)
   x = BatchNormalization()(x)
   x = Activation(relu)(x)
   x = MaxPooling2D((3, 3), strides=(2, 2))(x)
 
-  #2nd stage
-  # frm here on only conv block and identity block, no pooling
+
 
   x = res_conv(x, s=1, filters=(64, 128))
   x = res_identity(x, filters=(64, 128))
   x = res_identity(x, filters=(64, 128))
 
-  # # 3rd stage
-  #
-  # x = res_conv(x, s=2, filters=(32, 64))
-  # x = res_identity(x, filters=(32, 64))
-  # x = res_identity(x, filters=(32, 64))
-  # x = res_identity(x, filters=(32, 64))
-  #
-  # # 4th stage
-  #
-  # x = res_conv(x, s=2, filters=(64, 128))
-  # x = res_identity(x, filters=(64, 128))
-  # x = res_identity(x, filters=(64, 128))
-  # x = res_identity(x, filters=(64, 128))
-  # x = res_identity(x, filters=(64, 128))
-  # x = res_identity(x, filters=(64, 128))
-  # #
-  # # 5th stage
-  #
-  # x = res_conv(x, s=2, filters=(128, 256))
-  # x = res_identity(x, filters=(128, 256))
-  # x = res_identity(x, filters=(128, 256))
 
-  # ends with average pooling and dense connection
 
   x = AveragePooling2D((2, 2), padding='same')(x)
 
@@ -268,24 +211,11 @@ def resnet50(train_im):
 
 
 
-resnet50_model = resnet50(X_train_imagessss)
+resnet_model = resnet(X_train_imagessss)
 
-resnet50_model.compile(loss=tf.keras.losses.SparseCategoricalCrossentropy(from_logits= True), optimizer=Adam(learning_rate=1e-3),
+resnet_model.compile(loss=tf.keras.losses.SparseCategoricalCrossentropy(from_logits= True), optimizer=Adam(learning_rate=1e-3),
                        metrics=['acc'])
-resnet50_model.summary()
-# model = Sequential()
-# #model.add(Conv2D(32, kernel_size = (3, 3), activation = 'relu', input_shape = (28, 28, 1)))
-# model.add(Conv2D(32, kernel_size = (5, 5), activation = 'relu'))
-# model.add(MaxPooling2D(pool_size = (2, 2)))
-# model.add(Conv2D(64, kernel_size = (5, 5), activation = 'relu'))
-# model.add(MaxPooling2D(pool_size = (2, 2)))
-# model.add(Flatten())
-# model.add(Dense(128, activation = 'relu'))
-# model.add(Dense(64, activation = 'relu'))
-# model.add(Dense(40))
-#
-# model.compile(optimizer = Adam(), loss = tf.keras.losses.SparseCategoricalCrossentropy(from_logits= True), metrics = ['accuracy'], )
-
+resnet_model.summary()
 
 def lrdecay(epoch):
     lr = 1e-4
@@ -297,25 +227,20 @@ def lrdecay(epoch):
         lr *= 1e-2
     elif epoch > 80:
         lr *= 1e-1
-    #print('Learning rate: ', lr)
+
     return lr
-  # if epoch < 40:
-  #   return 0.01
-  # else:
-  #   return 0.01 * np.math.exp(0.03 * (40 - epoch))
+
 lrdecay = tf.keras.callbacks.LearningRateScheduler(lrdecay) # learning rate decay
 
-# 15 epochs: 20%
 
-#history = resnet50_model.fit(it, batch_size = 64, epochs = 15, verbose = 1, callbacks=[lrdecay])
-history = resnet50_model.fit(it, epochs = 30, verbose = 1, callbacks=[lrdecay])
-#history = resnet50_model.fit(X_train_images, train_labels, epochs = 20, verbose = 1, callbacks=[lrdecay], validation_data = (X_test_images, test_labels))
-#history = model.fit(X_train_images, Y_train, batch_size = 128, epochs = 15, verbose = 2)
 
-scores = resnet50_model.evaluate(X_test_images, test_labels, verbose = 2)
-#scores = model.evaluate(X_validation_images, Y_validation, verbose = 2)
 
-print(f'Score for fold: {resnet50_model.metrics_names[0]} of {scores[0]}; {resnet50_model.metrics_names[1]} of {scores[1]*100}%')
+history = resnet_model.fit(it, epochs = 30, verbose = 1, callbacks=[lrdecay])
+
+
+scores = resnet_model.evaluate(X_test_images, test_labels, verbose = 2)
+
+print(f'Score for fold: {resnet_model.metrics_names[0]} of {scores[0]}; {resnet_model.metrics_names[1]} of {scores[1]*100}%')
 
 
 
@@ -325,5 +250,4 @@ print(f'Score for fold: {resnet50_model.metrics_names[0]} of {scores[0]}; {resne
 # cv2.imshow('Image', img)
 # print(f'An image with the label - {train_labels[image_no]}')
 
-print('Hello')
 #cv2.waitKey(0)
