@@ -19,13 +19,6 @@ from PIL import Image
 from sklearn import utils
 from clr_callback import CyclicLR
 
-def rgb2gray(rgb):
-
-    r, g, b = rgb[:,:,0], rgb[:,:,1], rgb[:,:,2]
-    gray = 0.2989 * r + 0.5870 * g + 0.1140 * b
-
-    return gray
-
 
 #----------------------------import data----------------------------------------------------------------
 
@@ -42,7 +35,7 @@ action_categories = ['handShake', 'highFive', 'hug', 'kiss']  # we ignore the ne
 # test set
 test_files = []
 
-indices = [1,3,6,8,9,11,13,15]
+indices = [0,2,6,8,10,12,15]
 
 for c in range(len(action_categories)):
     for i in set_1_indices[c]:
@@ -81,7 +74,7 @@ for i in range(0,len(test_labels)):
     test_labels[i] = categ_dict[test_labels[i]]
 
 
-IMAGE_SIZE = 112
+IMAGE_SIZE = 100
 CHANNELS = 3
 
 X_train_imagesR = []
@@ -95,33 +88,21 @@ for i in range(0,len(train_files)):
 X_train_imagesOpt = []
 
 for i in range(0, len(X_train_imagesR)):
-    temp_im_train = []
-    for j in range(0,len(X_train_imagesR[i])):
-        temp_im_train.append(rgb2gray(np.array(X_train_imagesR[i][j])))
-    #temp_im_train = np.concatenate(([rgb2gray(np.array(array)) for array in X_train_imagesR[i]]), axis=1)
-    temp_im_train = np.array(temp_im_train)
-    temp_im_train = temp_im_train.reshape(temp_im_train.shape[1], temp_im_train.shape[2], temp_im_train.shape[0])
-    X_train_imagesOpt.append(temp_im_train)
+    arrays = [np.array(array) for array in X_train_imagesR[i]]
+
+    X_train_imagesOpt.append(np.stack(arrays))
 
 
 X_train_imagesOpt = np.array(X_train_imagesOpt)
-print("Train size",X_train_imagesOpt.shape)
 
 X_test_imagesOpt = []
 
 for i in range(0, len(X_test_imagesR)):
-    temp_im_test = []
-    for j in range(0, len(X_test_imagesR[i])):
-        temp_im_test.append(rgb2gray(np.array(X_test_imagesR[i][j])))
-    temp_im_test = np.array(temp_im_test)
-    #temp_im_test = np.concatenate(([rgb2gray(np.array(array)) for array in X_test_imagesR[i]]), axis=2)
-    temp_im_test = temp_im_test.reshape(temp_im_test.shape[1], temp_im_test.shape[2], temp_im_test.shape[0])
+    arrays = [np.array(array) for array in X_test_imagesR[i]]
 
-    X_test_imagesOpt.append(temp_im_test)
+    X_test_imagesOpt.append(np.stack(arrays))
 
 X_test_imagesOpt = np.array(X_test_imagesOpt)
-print("Test size: ", X_test_imagesOpt.shape)
-
 
 
 test_files = [f'TV-HI/midframesTest/{action_categories[c]}_{i:04d}.png' for c in range(len(action_categories)) for i in set_1_indices[c]]
@@ -165,9 +146,12 @@ X_test_imagesTransfer = np.array(tf_resize_images(test_files, IMAGE_SIZE, CHANNE
 
 
 transfer_model = keras.models.load_model('data/transferModel-33')
-transfer_model.summary()
+#transfer_model.summary()
 pretrainedTransfer = keras.Model(
     transfer_model.inputs, transfer_model.layers[-1].input, name="pretrained_transfer"
+)
+pretrainedTransfer2 = keras.Model(
+    transfer_model.inputs, transfer_model.layers[-1].input, name="pretrained_transfer2"
 )
 pretrainedTransfer.trainable = False
 
@@ -175,58 +159,79 @@ inputTransfer = keras.Input(shape=(112,112,3))
 
 x = pretrainedTransfer(inputTransfer,training=False)
 
+pretrainedTransfer2.trainable = True
+
+x2 = pretrainedTransfer2(inputTransfer,training=True)
+
 outputTransfer = Dense(4,activation = 'softmax')(x)
+outputTransfer2 = Dense(4,activation = 'softmax')(x2)
 
 transferModel = keras.Model(inputTransfer, outputTransfer)
+transferModel2 = keras.Model(inputTransfer, outputTransfer2)
+
+#transferModel.summary()
+#transferModel2.summary()
 
 
-
-optFlow_model = keras.models.load_model('data/optFlow-41')
+optFlow_model = keras.models.load_model('data/optFlow3D-40')
 optFlow_model.summary()
 pretrainedOptFlow = keras.Model(
     optFlow_model.inputs, optFlow_model.layers[-1].input, name="pretrained_optFlow"
 )
 pretrainedOptFlow.trainable = False
 
-inputOptFlow = keras.Input(shape=(112, 112, 8))
-#inputOptFlow = keras.Input(shape=(7, 100, 100, 3))
+pretrainedOptFlow2 = keras.Model(
+    optFlow_model.inputs, optFlow_model.layers[-1].input, name="pretrained_optFlow2"
+)
+pretrainedOptFlow2.trainable = True
+
+inputOptFlow = keras.Input(shape=(7, 100, 100,3))
 
 x = pretrainedOptFlow(inputOptFlow,training=False)
+x2 = pretrainedOptFlow2(inputOptFlow,training=True)
 
 outputOptFlow = Dense(4,activation = 'softmax')(x)
+outputOptFlow2 = Dense(4,activation = 'softmax')(x2)
 
 optFlowModel = keras.Model(inputOptFlow, outputOptFlow)
+optFlowModel2 = keras.Model(inputOptFlow, outputOptFlow2)
+
+optFlowModel.summary()
+optFlowModel2.summary()
 
 
 
 #outputs = average([transferModel.output, optFlowModel.output])
-#outputs = Maximum()([transferModel.output, optFlowModel.output])
-#outputs = Minimum()([transferModel.output, optFlowModel.output])
-#outputs = Add()([transferModel.output, optFlowModel.output])
-#outputs = Multiply()([transferModel.output, optFlowModel.output])
-#outputs = Subtract()([transferModel.output, optFlowModel.output])
-#outputs = Average()([transferModel.output, optFlowModel.output])
+#outputs = Maximum()([transferModel.output, optFlowModel.output]) - 49%
+#outputs = Minimum()([transferModel.output, optFlowModel.output]) - 43%
+#outputs = Add()([transferModel.output, optFlowModel.output]) - 31%
+#outputs = Multiply()([transferModel.output, optFlowModel.output]) - 34%
+#outputs = Subtract()([transferModel.output, optFlowModel.output]) - 31%
+#outputs = Average()([transferModel.output, optFlowModel.output]) - 38%
 #outputs1 = Maximum()([transferModel.output, optFlowModel.output])
 #outputs2 = Minimum()([transferModel.output, optFlowModel.output])
 #outputs = Subtract()([outputs1, outputs2])
-
 outputs = Maximum()([transferModel.output, optFlowModel.output])
+outputs2 = Maximum()([transferModel2.output, optFlowModel2.output])
 
-model = Model([transferModel.input, optFlowModel.input], outputs)
+xOut = Dense(32, activation='relu', kernel_regularizer = keras.regularizers.l2(0.01))(outputs)
+xOut2 = Dense(32, activation='relu', kernel_regularizer = keras.regularizers.l2(0.01))(outputs2)
 
-model.summary()
+outputs3 = Maximum()([xOut, xOut2])
+
+model = Model([transferModel.input, optFlowModel.input], outputs3)
+
+#model.summary()
 
 x = model([transferModel.input, optFlowModel.input],training=False)
-output_new = Dense(32)(x)
-output_new = Dense(64)(x)
+#output_new = Dense(32)(x)
+#output_new = Dense(64)(x)
 output_new = Dense(4)(x)
 new_model = keras.Model([transferModel.input, optFlowModel.input],output_new)
 
+new_model.summary()
 
-
-#MIN_LR = 1e-4
-#MAX_LR = 1e-1
-MIN_LR = 1e-7
+MIN_LR = 1e-5
 MAX_LR = 1e-2
 BATCH_SIZE = 1
 STEP_SIZE = 8
@@ -241,11 +246,11 @@ clr = CyclicLR(
 
 
 
-new_model.compile(loss=tf.keras.losses.SparseCategoricalCrossentropy(from_logits= True), optimizer=Adam(learning_rate=0.001),
+new_model.compile(loss=tf.keras.losses.SparseCategoricalCrossentropy(from_logits= True), optimizer=Adam(learning_rate=0.005),
                        metrics=['acc'])
 
 def lrdecay(epoch):
-    lr = 0.005
+    lr = 0.0001
     if epoch > 26:
         lr *= 0.0625
     elif epoch > 22:
@@ -262,8 +267,7 @@ def lrdecay(epoch):
   #   return 0.01 * np.math.exp(0.03 * (40 - epoch))
 lrdecay = tf.keras.callbacks.LearningRateScheduler(lrdecay) # learning rate decay
 
-#history = new_model.fit([X_train_imagesTransfer, X_train_imagesOpt], train_labels, batch_size = 1, epochs = 30, verbose = 2, callbacks=[clr], validation_data = ([X_test_imagesTransfer, X_test_imagesOpt], test_labels))
-history = new_model.fit([X_train_imagesTransfer, X_train_imagesOpt], train_labels, batch_size = 1, epochs = 50, verbose = 2, validation_data = ([X_test_imagesTransfer, X_test_imagesOpt], test_labels))
+history = new_model.fit([X_train_imagesTransfer, X_train_imagesOpt], train_labels, batch_size = 1, epochs = 15, verbose = 2, callbacks=[lrdecay], validation_data = ([X_test_imagesTransfer, X_test_imagesOpt], test_labels))
 
 
 scores = new_model.evaluate([X_test_imagesTransfer, X_test_imagesOpt], test_labels, verbose = 2)

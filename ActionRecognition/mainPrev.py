@@ -17,7 +17,6 @@ from tensorflow.keras.activations import relu
 from PIL import Image
 from sklearn import utils
 from tensorflow.keras.preprocessing.image import ImageDataGenerator
-import matplotlib.pyplot as plt
 
 # url1 = 'http://vision.stanford.edu/Datasets/Stanford40_JPEGImages.zip'
 #
@@ -28,7 +27,7 @@ import matplotlib.pyplot as plt
 # filename1
 # filename2
 
-withAugmentation = False;
+withAugmentation = True;
 
 with open('ImageSplits/train.txt', 'r') as f:
     train_files = list(map(str.strip, f.readlines()))
@@ -248,33 +247,11 @@ else:
     history = resnet_model.fit(X_train_images, Y_train, epochs=30, verbose=1, callbacks=[lrdecay])
 
 
-xaxis = list(range(1, 15 + 1))
-plt.plot(xaxis, history.history['accuracy'], label='accuracy')
-plt.plot(xaxis, history.history['val_accuracy'], label='val_accuracy')
-plt.xlabel('Epoch')
-plt.ylabel('Accuracy')
-plt.legend(loc='lower right')
-plt.savefig('data/plots/ArchMainAcc.png')
-plt.close()
-
-plt.plot(xaxis, history.history['loss'], label='loss')
-plt.plot(xaxis, history.history['val_loss'], label='val_loss')
-plt.xlabel('Epoch')
-plt.ylabel('Loss')
-plt.legend(loc='upper right')
-plt.savefig('data/plots/ArchMainLoss.png')
-plt.close()
-
-resnet_model.save_weights('data/model/ArchMainWeights')
-#model.save('data/model/model' + str(fold_no))
-
-model_json = resnet_model.to_json()
-with open('data/architecture/architectureStandford.json', "w") as json_file:
-    json_file.write(model_json)
-
 scores = resnet_model.evaluate(X_test_images, test_labels, verbose = 2)
 
 print(f'Score for fold: {resnet_model.metrics_names[0]} of {scores[0]}; {resnet_model.metrics_names[1]} of {scores[1]*100}%')
+
+
 
 
 # image_no = 3999  # change this to a number between [0, 3999] and you can see a different training image
