@@ -162,7 +162,7 @@ transferModel = keras.Model(inputTransfer, outputTransfer)
 
 
 
-optFlow_model = keras.models.load_model('data/optFlow-40')
+optFlow_model = keras.models.load_model('data/optFlow3D-40')
 optFlow_model.summary()
 pretrainedOptFlow = keras.Model(
     optFlow_model.inputs, optFlow_model.layers[-1].input, name="pretrained_optFlow"

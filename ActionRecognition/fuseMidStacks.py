@@ -181,7 +181,7 @@ transferModel = keras.Model(inputTransfer, outputTransfer)
 
 
 
-optFlow_model = keras.models.load_model('data/optFlow-40')
+optFlow_model = keras.models.load_model('data/optFlow-41')
 optFlow_model.summary()
 pretrainedOptFlow = keras.Model(
     optFlow_model.inputs, optFlow_model.layers[-1].input, name="pretrained_optFlow"
@@ -262,7 +262,7 @@ def lrdecay(epoch):
 lrdecay = tf.keras.callbacks.LearningRateScheduler(lrdecay) # learning rate decay
 
 #history = new_model.fit([X_train_imagesTransfer, X_train_imagesOpt], train_labels, batch_size = 1, epochs = 30, verbose = 2, callbacks=[clr], validation_data = ([X_test_imagesTransfer, X_test_imagesOpt], test_labels))
-history = new_model.fit([X_train_imagesTransfer, X_train_imagesOpt], train_labels, batch_size = 1, epochs = 30, verbose = 2, validation_data = ([X_test_imagesTransfer, X_test_imagesOpt], test_labels))
+history = new_model.fit([X_train_imagesTransfer, X_train_imagesOpt], train_labels, batch_size = 1, epochs = 50, verbose = 2, validation_data = ([X_test_imagesTransfer, X_test_imagesOpt], test_labels))
 
 
 scores = new_model.evaluate([X_test_imagesTransfer, X_test_imagesOpt], test_labels, verbose = 2)

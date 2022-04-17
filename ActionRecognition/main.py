@@ -27,6 +27,8 @@ from tensorflow.keras.preprocessing.image import ImageDataGenerator
 # filename1
 # filename2
 
+withAugmentation = True;
+
 with open('ImageSplits/train.txt', 'r') as f:
     train_files = list(map(str.strip, f.readlines()))
     train_labels = ['_'.join(name.split('_')[:-1]) for name in train_files]
@@ -95,23 +97,28 @@ def tf_resize_images(X_img_file_paths):
     X_data = np.array(X_data, dtype = np.float32) # Convert to numpy
     return X_data
 
-X_train_imagessss = tf_resize_images(X_train)
+#X_train_imagessss = tf_resize_images(X_train)
 
-X_validation_images = tf_resize_images(X_validation)
+X_validation_images = np.array(tf_resize_images(X_validation))
 
-X_train_images = np.array(tf_resize_images(train_files))
+#X_train_images = np.array(tf_resize_images(X_train))
+X_train_images = tf_resize_images(X_train)
 
 X_test_images = np.array(tf_resize_images(test_files))
 
-datagen = ImageDataGenerator(height_shift_range=0.1, width_shift_range=0.1)
-#datagen = ImageDataGenerator(width_shift_range=0.1, height_shift_range=0.1, rotation_range = 0.1)
-# (rotation_range = 10, horizontal_flip = True, zoom_range = 0.1)
-# rotation_range = 10, fill_mode = 'nearest'
+if withAugmentation == True:
+    #datagen = ImageDataGenerator(height_shift_range=0.1, width_shift_range=0.1, rotation_range = 0.1, zoom_range = 0.1, fill_mode = 'nearest')
+    datagen = ImageDataGenerator(height_shift_range=0.1, width_shift_range=0.1, zoom_range=0.02, fill_mode='nearest', rotation_range = 0.05)
+    #22.487346827983856%
+    #22.668112814426422%
 
-train_imagesAug = X_train_images.reshape(X_train_images.shape[0], 112, 112, 3)
+    #datagen = ImageDataGenerator(width_shift_range=0.1, height_shift_range=0.1, rotation_range = 0.1)
+    # (rotation_range = 10, horizontal_flip = True, zoom_range = 0.1)
+    # rotation_range = 10, fill_mode = 'nearest'
 
-# create iterator
-it = datagen.flow(train_imagesAug, train_labels)
+    train_imagesAug = X_train_images.reshape(X_train_images.shape[0], 112, 112, 3)
+    # create iterator
+    it = datagen.flow(train_imagesAug, Y_train)
 
 
 def res_identity(x, filters):
@@ -211,7 +218,7 @@ def resnet(train_im):
 
 
 
-resnet_model = resnet(X_train_imagessss)
+resnet_model = resnet(X_train_images)
 
 resnet_model.compile(loss=tf.keras.losses.SparseCategoricalCrossentropy(from_logits= True), optimizer=Adam(learning_rate=1e-3),
                        metrics=['acc'])
@@ -234,8 +241,10 @@ lrdecay = tf.keras.callbacks.LearningRateScheduler(lrdecay) # learning rate deca
 
 
 
-
-history = resnet_model.fit(it, epochs = 30, verbose = 1, callbacks=[lrdecay])
+if withAugmentation == True:
+    history = resnet_model.fit(it, epochs = 30, verbose = 1, callbacks=[lrdecay])
+else:
+    history = resnet_model.fit(X_train_images, Y_train, epochs=30, verbose=1, callbacks=[lrdecay])
 
 
 scores = resnet_model.evaluate(X_test_images, test_labels, verbose = 2)
